@@ -2353,6 +2353,80 @@ Sent from your portfolio website
     }
   </style>
 
+  <style>
+    /* ===== IMAGE LIGHTBOX ===== */
+    .ads-lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      background: rgba(5, 8, 18, .88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .ads-lightbox.active {
+      display: flex;
+    }
+
+    .ads-lightbox img {
+      max-width: 94vw;
+      max-height: 90vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 16px;
+      box-shadow: 0 30px 100px rgba(0, 0, 0, .55);
+      animation: adsZoom .3s ease;
+    }
+
+    @keyframes adsZoom {
+      from {
+        opacity: 0;
+        transform: scale(.92);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .ads-lightbox-close {
+      position: absolute;
+      top: 22px;
+      right: 28px;
+      width: 44px;
+      height: 44px;
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      color: #fff;
+      font-size: 25px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: .25s ease;
+    }
+
+    .ads-lightbox-close:hover {
+      background: rgba(255, 255, 255, .18);
+      transform: rotate(90deg);
+    }
+
+    .ads-shot {
+      cursor: pointer;
+    }
+
+    .ads-shot img {
+      cursor: zoom-in;
+    }
+  </style>
+
   <style id="real-redesign">
     /* ===== REAL VISUAL REDESIGN v2 ===== */
     :root {
@@ -3382,1113 +3456,1713 @@ Sent from your portfolio website
         transform: translateX(190%)
       }
     }
+
+    /* ===== PERFORMANCE OPTIMIZATION ===== */
+    section:not(.hero) {
+      contain: layout paint
+    }
+
+    img {
+      content-visibility: auto
+    }
+
+    .skill,
+    .service-card,
+    .project,
+    .price,
+    .profile,
+    .hero-anime-wrap,
+    .hero-anime,
+    .cursor-dot,
+    .cursor-ring,
+    .cursor-light {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden
+    }
+
+    @media(max-width:900px), (prefers-reduced-motion:reduce) {
+
+      .cursor-light,
+      .cursor-dot,
+      .cursor-ring,
+      .cursor-label {
+        display: none !important
+      }
+
+      .hero-orbit,
+      .anime-scan,
+      .anime-glow,
+      .particle,
+      .bg-obstacle,
+      .float-card {
+        animation: none !important
+      }
+
+      body::after {
+        animation: none !important;
+        filter: none !important
+      }
+
+      .reveal {
+        filter: none !important;
+        transition: opacity .45s ease, transform .45s ease !important
+      }
+
+      [data-tilt]>* {
+        transform: none !important
+      }
+    }
+
+    @media(max-width:650px) {
+      header {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px)
+      }
+
+      .hero-anime-wrap {
+        filter: drop-shadow(0 20px 35px rgba(20, 35, 90, .20))
+      }
+    }
   </style>
 
 </head>
 
 <body>
+  <?php
+  $adsProject = isset($_GET['project']) ? $_GET['project'] : '';
 
-  <div class="ambient-orb" id="ambientOrb" aria-hidden="true"></div>
-  <div class="page-loader" id="pageLoader" aria-hidden="true">
-    <div class="loader-mark">M<span>.</span></div>
-    <div class="loader-line"><i></i></div>
-  </div>
+  if ($adsProject === 'google-ads' || $adsProject === 'meta-ads') {
+    $isGoogle = $adsProject === 'google-ads';
+    $title = $isGoogle ? 'Google Ads' : 'Meta Ads';
+    $image = $isGoogle ? 'ads-google.jpg' : 'ads-meta.jpg';
+    $slug = $isGoogle ? 'google' : 'meta';
+    $platform = $isGoogle ? 'Google Search • PPC • Lead Generation' : 'Facebook • Instagram • Lead Generation';
+    $description = $isGoogle
+      ? 'Paid search campaigns designed to capture high-intent users, generate qualified leads and improve conversion efficiency.'
+      : 'Paid social campaigns designed to reach the right audience, test creative and generate qualified leads.';
+    $items = $isGoogle
+      ? ['Keyword research & high-intent targeting', 'Campaign and ad-group structure', 'Conversion tracking & landing-page alignment', 'Bid, budget and search-term optimisation']
+      : ['Audience research & targeting', 'Facebook and Instagram campaign setup', 'Creative testing & retargeting', 'Lead generation & performance optimisation'];
+  ?>
+    <style>
+      /* ===== PORTFOLIO-NATIVE ADS PROJECT PAGE ===== */
+      html {
+        cursor: none
+      }
 
-  <div id="animated-bg"></div>
-  <div id="bg-obstacles" aria-hidden="true"></div>
-  <div id="particles"></div>
-  <div class="cursor-light" id="cursorLight"></div>
-  <div class="scroll-progress" id="scrollProgress"></div>
-  <div class="cursor-dot" id="cursorDot"></div>
-  <div class="cursor-ring" id="cursorRing"></div>
-  <div class="cursor-label" id="cursorLabel">VIEW</div>
-  <button class="back-top" id="backTop" aria-label="Back to top">↑</button>
+      body.ads-project-body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at 15% 8%, rgba(99, 91, 255, .10), transparent 28%),
+          radial-gradient(circle at 85% 28%, rgba(24, 160, 251, .08), transparent 30%),
+          var(--bg);
+        color: var(--ink);
+      }
 
+      .ads-page {
+        width: min(1160px, 90%);
+        margin: 0 auto;
+        padding: 126px 0 90px;
+        position: relative;
+        z-index: 2;
+      }
 
-  <header>
-    <div class="container nav">
-      <a class="logo" href="#home">Mayank<span>.</span></a>
-      <div class="navlinks" id="navlinks">
-        <a href="#home">Home</a><a href="#about">About</a><a href="#skills">Skills</a>
-        <a href="#services">Services</a><a href="#projects">Projects</a><a href="#pricing">Pricing</a><a href="#process">Process</a><a href="#contact">Contact</a>
-      </div>
-      <div class="nav-tools"><button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">☾</button><a class="navcta magnetic" href="#contact">Let's Talk ↗</a></div>
-      <div class="menu" onclick="document.getElementById('navlinks').classList.toggle('open')">☰</div>
-    </div>
-  </header>
+      .ads-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 48px;
+      }
 
-  <main>
-    <section class="hero container" id="home">
-      <div class="reveal">
-        <div class="eyebrow"><span class="dot"></span> Available for freelance projects</div>
-        <h1>I Build <span class="gradient">Digital Experiences</span> That Grow Brands.</h1>
-        <p>I'm Mayank Garg — Freelancer, Digital Marketer & Web Developer. I create modern websites, digital strategies, visual identities and AI-powered solutions that help businesses stand out online.</p>
-        <div class="actions"><a class="btn btn-primary magnetic" href="#projects">View My Work →</a><a class="btn btn-secondary magnetic" href="#contact">Start a Project</a></div>
-      </div>
-      <div class="hero3d reveal" id="hero3d">
-        <div class="hero-anime-wrap" id="heroAnime">
-          <div class="hero-orbit"></div>
-          <div class="anime-glow"></div>
-          <img class="hero-anime" src="hero.png" alt="Mayank Garg futuristic anime developer hero">
-          <div class="anime-scan"></div>
-          <div class="anime-float anime-float-1">✦ 10+ PROJECTS</div>
-          <div class="anime-float anime-float-2">AI • WEB • MARKETING</div>
+      .ads-mini {
+        font: 700 10px "Space Grotesk";
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .ads-mini:before {
+        content: "";
+        display: inline-block;
+        width: 22px;
+        height: 1px;
+        margin: 0 9px 3px 0;
+        background: linear-gradient(90deg, var(--blue), var(--purple));
+      }
+
+      .ads-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--ink);
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 10px 14px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, .72);
+        border-radius: 999px;
+        box-shadow: 0 10px 30px rgba(28, 38, 65, .06);
+        transition: .25s ease;
+      }
+
+      .ads-back:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(28, 38, 65, .10)
+      }
+
+      .ads-head {
+        display: grid;
+        grid-template-columns: 1fr .52fr;
+        gap: 55px;
+        align-items: end;
+        margin-bottom: 34px;
+      }
+
+      .ads-title {
+        margin: 0;
+        font: 700 clamp(50px, 7vw, 82px)/.93 "Space Grotesk";
+        letter-spacing: -4.5px;
+      }
+
+      .ads-gradient {
+        background: linear-gradient(100deg, var(--blue), var(--cyan), var(--purple));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .ads-desc {
+        margin: 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.85;
+      }
+
+      .ads-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 22px
+      }
+
+      .ads-tag {
+        padding: 7px 11px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .7);
+        color: var(--muted);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 1.1px;
+        text-transform: uppercase;
+      }
+
+      .ads-hero {
+        display: grid;
+        grid-template-columns: 1.48fr .72fr;
+        gap: 18px;
+      }
+
+      .ads-cover {
+        min-height: 460px;
+        position: relative;
+        overflow: hidden;
+        border-radius: 30px;
+        border: 1px solid var(--line);
+        background: #eef2fb;
+        box-shadow: var(--shadow);
+      }
+
+      .ads-cover:before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(99, 91, 255, .15), transparent 45%, rgba(24, 160, 251, .10));
+      }
+
+      .ads-cover:after {
+        content: "";
+        position: absolute;
+        left: 8%;
+        right: 8%;
+        bottom: 0;
+        height: 2px;
+        z-index: 2;
+        background: linear-gradient(90deg, transparent, var(--blue), var(--cyan), var(--purple), transparent);
+      }
+
+      .ads-cover img {
+        display: block;
+        width: 100%;
+        height: 460px;
+        object-fit: cover;
+        transition: transform .7s ease;
+      }
+
+      .ads-cover:hover img {
+        transform: scale(1.025)
+      }
+
+      .ads-fallback {
+        height: 460px;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        color: var(--ink);
+        font: 700 27px "Space Grotesk";
+        background: radial-gradient(circle at 50% 30%, rgba(99, 91, 255, .16), transparent 48%), #eef2fb;
+      }
+
+      .ads-side {
+        min-height: 460px;
+        padding: 28px;
+        border-radius: 30px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, .75);
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .ads-side-label {
+        font: 700 9px "Space Grotesk";
+        letter-spacing: 2.4px;
+        text-transform: uppercase;
+        color: #9aa3b5;
+      }
+
+      .ads-side h2 {
+        margin: 12px 0 8px;
+        font: 700 39px/1 "Space Grotesk";
+        letter-spacing: -2px;
+      }
+
+      .ads-side p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.75
+      }
+
+      .ads-platform {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 17px;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--ink);
+      }
+
+      .ads-platform i {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: block;
+        background: linear-gradient(135deg, var(--blue), var(--purple));
+        box-shadow: 0 0 13px rgba(99, 91, 255, .45);
+      }
+
+      .ads-metrics {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+        margin-top: 28px
+      }
+
+      .ads-metric {
+        padding: 15px;
+        border-radius: 15px;
+        background: #f7f8fc;
+        border: 1px solid var(--line);
+      }
+
+      .ads-metric b {
+        display: block;
+        font: 700 15px "Space Grotesk";
+        margin-bottom: 4px
+      }
+
+      .ads-metric span {
+        font-size: 8px;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        color: #9aa3b5
+      }
+
+      .ads-section {
+        margin-top: 62px
+      }
+
+      .ads-section-head {
+        margin-bottom: 20px
+      }
+
+      .ads-section-head small {
+        font: 700 9px "Space Grotesk";
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        color: #9aa3b5;
+      }
+
+      .ads-section-head h2 {
+        margin: 8px 0 0;
+        font: 700 clamp(33px, 5vw, 51px)/1 "Space Grotesk";
+        letter-spacing: -2.5px;
+      }
+
+      .ads-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px
+      }
+
+      .ads-card {
+        min-height: 195px;
+        padding: 27px;
+        border-radius: 23px;
+        background: rgba(255, 255, 255, .76);
+        border: 1px solid var(--line);
+        box-shadow: 0 15px 55px rgba(28, 38, 65, .055);
+        transition: .3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .ads-card:after {
+        content: "";
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        right: -90px;
+        bottom: -90px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(99, 91, 255, .13), transparent 70%);
+      }
+
+      .ads-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 65px rgba(28, 38, 65, .10)
+      }
+
+      .ads-card-num {
+        font: 700 9px "Space Grotesk";
+        letter-spacing: 2px;
+        color: var(--blue);
+      }
+
+      .ads-card h3 {
+        margin: 11px 0 9px;
+        font: 700 23px "Space Grotesk";
+        letter-spacing: -.7px
+      }
+
+      .ads-card p,
+      .ads-card li {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.8
+      }
+
+      .ads-card ul {
+        margin: 0;
+        padding-left: 18px
+      }
+
+      .ads-card li+li {
+        margin-top: 4px
+      }
+
+      .ads-gallery {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+      }
+
+      .ads-shot {
+        border-radius: 21px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        background: #f1f3f9;
+        box-shadow: 0 15px 50px rgba(28, 38, 65, .055);
+      }
+
+      .ads-shot img {
+        display: block;
+        width: 100%;
+        height: 285px;
+        object-fit: cover;
+        transition: .55s ease
+      }
+
+      .ads-shot:hover img {
+        transform: scale(1.035)
+      }
+
+      .ads-shot-fallback {
+        height: 285px;
+        display: grid;
+        place-items: center;
+        color: #9aa3b5;
+        font-size: 11px;
+        background: linear-gradient(145deg, #f8f9fc, #eef1f8);
+      }
+
+      .ads-cta {
+        margin-top: 58px;
+        padding: 27px 29px;
+        border-radius: 24px;
+        background: linear-gradient(135deg, rgba(99, 91, 255, .07), rgba(24, 160, 251, .06));
+        border: 1px solid rgba(99, 91, 255, .14);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      .ads-cta h3 {
+        margin: 0 0 5px;
+        font: 700 24px "Space Grotesk";
+        letter-spacing: -.7px
+      }
+
+      .ads-cta p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px
+      }
+
+      .ads-cta a {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        white-space: nowrap;
+        padding: 12px 18px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--blue), var(--purple));
+        color: #fff;
+        text-decoration: none;
+        font-size: 11px;
+        font-weight: 700;
+        box-shadow: 0 12px 28px rgba(99, 91, 255, .2);
+        transition: .25s ease;
+      }
+
+      .ads-cta a:hover {
+        transform: translateY(-3px)
+      }
+
+      /* Keep the portfolio cursor working on this early-exit page. */
+      .ads-cursor-dot,
+      .ads-cursor-ring,
+      .ads-cursor-light {
+        position: fixed;
+        pointer-events: none;
+        left: 0;
+        top: 0;
+        transform: translate(-50%, -50%);
+      }
+
+      .ads-cursor-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 0 14px #18a0fb, 0 0 30px #635bff;
+        z-index: 10003;
+        mix-blend-mode: difference
+      }
+
+      .ads-cursor-ring {
+        width: 38px;
+        height: 38px;
+        border: 1px solid rgba(99, 91, 255, .85);
+        border-radius: 50%;
+        z-index: 10002;
+        mix-blend-mode: difference;
+        transition: .2s ease
+      }
+
+      .ads-cursor-ring.hover {
+        width: 70px;
+        height: 70px;
+        border-color: rgba(24, 160, 251, .9);
+        background: rgba(24, 160, 251, .08)
+      }
+
+      .ads-cursor-light {
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        z-index: 9999;
+        background: radial-gradient(circle, rgba(99, 91, 255, .13), rgba(24, 160, 251, .05) 35%, transparent 70%);
+        mix-blend-mode: multiply;
+        opacity: .9
+      }
+
+      @media(max-width:900px) {
+        html {
+          cursor: auto
+        }
+
+        .ads-cursor-dot,
+        .ads-cursor-ring,
+        .ads-cursor-light {
+          display: none
+        }
+
+        .ads-head {
+          grid-template-columns: 1fr;
+          gap: 18px
+        }
+
+        .ads-hero {
+          grid-template-columns: 1fr
+        }
+
+        .ads-cover,
+        .ads-side {
+          min-height: 390px
+        }
+
+        .ads-cover img,
+        .ads-fallback {
+          height: 390px
+        }
+      }
+
+      @media(max-width:650px) {
+        .ads-page {
+          width: 92%;
+          padding-top: 105px
+        }
+
+        .ads-title {
+          font-size: 48px;
+          letter-spacing: -3px
+        }
+
+        .ads-nav {
+          margin-bottom: 34px
+        }
+
+        .ads-grid,
+        .ads-gallery {
+          grid-template-columns: 1fr
+        }
+
+        .ads-cover,
+        .ads-side {
+          min-height: 285px;
+          border-radius: 22px
+        }
+
+        .ads-cover img,
+        .ads-fallback {
+          height: 285px
+        }
+
+        .ads-side {
+          padding: 22px;
+          min-height: 350px
+        }
+
+        .ads-side h2 {
+          font-size: 33px
+        }
+
+        .ads-card {
+          min-height: 0;
+          padding: 22px
+        }
+
+        .ads-shot img,
+        .ads-shot-fallback {
+          height: 230px
+        }
+
+        .ads-cta {
+          align-items: flex-start;
+          flex-direction: column
+        }
+
+        .ads-cta a {
+          width: 100%;
+          justify-content: center
+        }
+      }
+    </style>
+
+    <body class="ads-project-body">
+      <div class="ads-page">
+
+        <div class="ads-nav">
+          <div class="ads-mini">Selected Work / <?php echo $isGoogle ? '05' : '06'; ?></div>
+          <a class="ads-back" href="index.php#projects">← Back to Projects</a>
         </div>
-      </div>
-    </section>
 
-
-    <div class="premium-marquee" aria-hidden="true">
-      <div class="premium-track">
-        <span>WEB DEVELOPMENT ✦</span><span>SEO & MARKETING ✦</span><span>AI SOLUTIONS ✦</span><span>CREATIVE DESIGN ✦</span><span>WEB DEVELOPMENT ✦</span><span>SEO & MARKETING ✦</span><span>AI SOLUTIONS ✦</span><span>CREATIVE DESIGN ✦</span>
-      </div>
-    </div>
-
-    <section class="trust-strip" aria-label="Capabilities">
-      <div class="container trust-grid">
-        <div><strong>50+</strong><span>Digital Projects</span></div>
-        <div><strong>8+</strong><span>Happy Clients</span></div>
-        <div><strong>4+</strong><span>Core Services</span></div>
-        <div><strong>100%</strong><span>Custom Solutions</span></div>
-      </div>
-    </section>
-
-    <section id="about">
-      <div class="container about">
-        <div class="profile reveal">
-          <img src="aboutme.png" alt="Mayank Garg">
-          <div class="badge">
-            <b>Mayank Garg</b><br>
-            <small>Digital Creator & Developer</small>
-          </div>
-        </div>
-        <div class="about-copy reveal">
-          <div class="kicker">01 / About Me</div>
-          <h2>Turning ideas into <span class="gradient">digital growth.</span></h2>
-          <p>I'm a multidisciplinary freelancer working across web development, digital marketing, design and emerging AI tools. My goal is simple: combine creativity with technology to build digital experiences that look premium and deliver real business value.</p>
-          <div class="stats">
-            <div class="stat"><b>10+</b><span>Projects</span></div>
-            <div class="stat"><b>8+</b><span>Clients</span></div>
-            <div class="stat"><b>10+</b><span>Skills</span></div>
-            <div class="stat"><b>100%</b><span>Creative</span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="skills">
-      <div class="container">
-        <div class="section-head reveal">
+        <div class="ads-head">
           <div>
-            <div class="kicker">02 / Expertise</div>
-            <h2>Skills that make<br>ideas <span class="gradient">real.</span></h2>
+            <h1 class="ads-title"><?php echo htmlspecialchars($title); ?> <span class="ads-gradient">Campaign.</span></h1>
+            <div class="ads-tags">
+              <?php
+              $badges = $isGoogle
+                ? ['Google Search', 'PPC', 'Lead Generation', 'Conversion Tracking']
+                : ['Facebook', 'Instagram', 'Audience Targeting', 'Retargeting'];
+              foreach ($badges as $badge):
+              ?>
+                <span class="ads-tag"><?php echo htmlspecialchars($badge); ?></span>
+              <?php endforeach; ?>
+            </div>
           </div>
-          <p class="lead">A practical mix of technology, marketing and creative skills to take a project from concept to launch.</p>
-        </div>
-        <div class="skills" id="skillCards">
-
-          <div class="skill reveal">
-
-            <div class="icon">💻</div>
-
-            <h3>Web Development</h3>
-
-            <p>
-              Responsive business, portfolio, e-commerce
-              and custom websites.
-            </p>
-
-            <div class="skill-line"></div>
-
-          </div>
-
-
-          <div class="skill reveal">
-
-            <div class="icon">📈</div>
-
-            <h3>Digital Marketing</h3>
-
-            <p>
-              SEO, social media, paid campaigns and
-              growth-focused strategies.
-            </p>
-
-            <div class="skill-line"></div>
-
-          </div>
-
-
-          <div class="skill reveal">
-
-            <div class="icon">🎨</div>
-
-            <h3>Graphic Design</h3>
-
-            <p>
-              Branding, social creatives, posters,
-              logos and visual systems.
-            </p>
-
-            <div class="skill-line"></div>
-
-          </div>
-
-
-          <div class="skill reveal">
-
-            <div class="icon">🤖</div>
-
-            <h3>AI & GenAI</h3>
-
-            <p>
-              AI-powered workflows, content creation
-              and creative automation.
-            </p>
-
-            <div class="skill-line"></div>
-
-          </div>
-
-          <div class="skill reveal">
-            <div class="icon">🎨</div>
-            <h3>UI/UX Design</h3>
-            <p>
-              Clean, modern and user-friendly interfaces
-              designed for better digital experiences.
-            </p>
-            <div class="skill-line"></div>
-          </div>
-
-          <div class="skill reveal">
-            <div class="icon">🌐</div>
-            <h3>WordPress Development</h3>
-            <p>
-              Professional WordPress websites with custom
-              layouts, responsive design and easy management.
-            </p>
-            <div class="skill-line"></div>
-          </div>
-
-          <div class="skill reveal">
-            <div class="icon">🛒</div>
-            <h3>E-Commerce</h3>
-            <p>
-              Modern online stores with attractive product
-              pages, smooth shopping experiences and conversions.
-            </p>
-            <div class="skill-line"></div>
-          </div>
-
-          <div class="skill reveal">
-            <div class="icon">🚀</div>
-            <h3>SEO &amp; Growth</h3>
-            <p>
-              Search optimization and growth strategies that
-              help websites reach the right audience.
-            </p>
-            <div class="skill-line"></div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-    <section id="services">
-      <div class="container">
-        <div class="section-head reveal">
-          <div>
-            <div class="kicker">03 / Services</div>
-            <h2>What I can do<br>for your <span class="gradient">business.</span></h2>
-          </div>
+          <p class="ads-desc"><?php echo htmlspecialchars($description); ?> The page is structured as a clean campaign case study so visitors can understand the work without leaving your portfolio's visual system.</p>
         </div>
 
-        <div class="services">
-
-          <!-- CARD 01 -->
-          <div class="service-card" data-number="01">
-            <div class="service-icon">💻</div>
-            <!-- <span class="service-number">01</span> -->
-
-
-
-            <h3>Web Development</h3>
-
-            <p>
-              High-performance, responsive and modern websites
-              designed to turn visitors into customers.
-            </p>
-
-            <div class="service-arrow">↗</div>
+        <div class="ads-hero">
+          <div class="ads-cover">
+            <img src="<?php echo htmlspecialchars($image); ?>" alt="<?php echo htmlspecialchars($title); ?> campaign"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='grid';">
+            <div class="ads-fallback" style="display:none"><?php echo htmlspecialchars($title); ?><br>Campaign Preview</div>
           </div>
 
-
-          <!-- CARD 02 -->
-          <div class="service-card" data-number="02">
-            <div class="service-icon">📈</div>
-            <!-- <span class="service-number">02</span> -->
-
-            <h3>SEO & Marketing</h3>
-
-            <p>
-              Improve visibility, reach the right audience
-              & turn digital attention into measurable growth.
-            </p>
-
-            <div class="service-arrow">↗</div>
-          </div>
-
-
-          <!-- CARD 03 -->
-          <div class="service-card" data-number="03">
-            <div class="service-icon">🎨</div>
-            <!-- <span class="service-number">03</span> -->
-
-            <h3>Social Media</h3>
-
-            <p>
-              Creative content, strategy and campaigns designed to
-              build a consistent and memorable online presence.
-            </p>
-
-            <div class="service-arrow">↗</div>
-          </div>
-
-
-          <!-- CARD 04 -->
-          <div class="service-card" data-number="04">
-            <div class="service-icon">🤖</div>
-            <!-- <span class="service-number">04</span> -->
-
-            <h3>Brand & Creative</h3>
-
-            <p>
-              Logos, visual identity, graphics and creative direction
-              that give your business a stronger personality.
-            </p>
-
-            <div class="service-arrow">↗</div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-    <section id="projects">
-      <div class="container">
-        <div class="section-head reveal">
-          <div>
-            <div class="kicker">04 / Selected Work</div>
-            <h2>Projects I'm<br><span class="gradient">proud of.</span></h2>
-          </div>
-          <p class="lead">A selection of websites, digital brands and creative projects. Replace these with your live project links whenever you're ready.</p>
-        </div>
-        <div class="projects">
-
-          <!-- PROJECT 01 -->
-          <div class="project reveal" data-tilt>
-
-            <img
-              class="project-image"
-              src="smd.png"
-              alt="SMD IIT Website">
-
-            <div class="big">01</div>
-
-            <div class="project-content">
-
-              <span class="project-tag">
-                Education Website
-              </span>
-
-              <h3>
-                S.M.D Institute of Information Technology
-              </h3>
-
-              <p>
-                Digital Learner • CCC • O Level
-              </p>
-
-              <a
-                href="https://smdiit.in/"
-                target="_blank">
-                View Project ↗
-              </a>
-
+          <aside class="ads-side">
+            <div>
+              <div class="ads-side-label">Project Overview</div>
+              <h2><?php echo htmlspecialchars($title); ?></h2>
+              <p><?php echo $isGoogle
+                    ? 'High-intent paid search built around the right keywords, strong messaging and conversion-focused optimisation.'
+                    : 'Paid social built around audience insight, creative testing, retargeting and conversion-focused optimisation.'; ?></p>
+              <span class="ads-platform"><i></i><?php echo htmlspecialchars($platform); ?></span>
             </div>
 
-          </div>
-
-
-          <!-- PROJECT 02 -->
-          <div class="project reveal" data-tilt>
-
-            <img
-              class="project-image"
-              src="career.png"
-              alt="Career Evolution">
-
-            <div class="big">02</div>
-
-            <div class="project-content">
-
-              <span class="project-tag">
-                EdTech
-              </span>
-
-              <h3>
-                Career Evolution
-              </h3>
-
-              <p>
-                EdTech • Website • Digital Growth
-              </p>
-
-              <a href="https://careerevolution.in/">
-                View Project ↗
-              </a>
-
+            <div class="ads-metrics">
+              <div class="ads-metric"><b><?php echo $isGoogle ? 'PPC' : 'Social'; ?></b><span>Campaign Type</span></div>
+              <div class="ads-metric"><b>Leads</b><span>Primary Goal</span></div>
+              <div class="ads-metric"><b>Testing</b><span>Optimisation</span></div>
+              <div class="ads-metric"><b>ROI</b><span>KPI</span></div>
             </div>
-
-          </div>
-
-
-          <!-- PROJECT 03 -->
-          <div class="project reveal" data-tilt>
-
-            <img
-              class="project-image"
-              src="pmi.png"
-              alt="Positive Muslim India">
-
-            <div class="big">03</div>
-
-            <div class="project-content">
-
-              <span class="project-tag">
-                Foundation
-              </span>
-
-              <h3>
-                Positive Muslim India
-              </h3>
-
-              <p>
-                Foundation Website • Social Impact
-              </p>
-
-              <a href="https://positivemuslimindia.com/">
-                View Project ↗
-              </a>
-
-            </div>
-
-          </div>
-
-
-          <!-- PROJECT 04 -->
-          <div class="project reveal" data-tilt>
-
-            <img
-              class="project-image"
-              src="puritz.png"
-              alt="Puritz Chem">
-
-            <div class="big">04</div>
-
-            <div class="project-content">
-
-              <span class="project-tag">
-                Corporate
-              </span>
-
-              <h3>
-                Puritz Chem
-              </h3>
-
-              <p>
-                Corporate Website • Business Branding
-              </p>
-
-              <a href="https://www.puritzchem.com/">
-                View Project ↗
-              </a>
-
-            </div>
-
-          </div>
-
-
-          <!-- PROJECT 05
-    <div class="project reveal" data-tilt>
-
-        <img
-            class="project-image"
-            src="img/projects/gemcart.jpg"
-            alt="GEMCART"
-        >
-
-        <div class="big">05</div>
-
-        <div class="project-content">
-
-            <span class="project-tag">
-                E-Commerce
-            </span>
-
-            <h3>
-                GEMCART
-            </h3>
-
-            <p>
-                Gaming Accessories • E-commerce Store
-            </p>
-
-            <a href="#">
-                View Project ↗
-            </a>
-
+          </aside>
         </div>
 
-    </div> -->
+        <div class="ads-section">
+          <div class="ads-section-head">
+            <small>Campaign Breakdown</small>
+            <h2>Strategy → execution → <span class="ads-gradient">growth.</span></h2>
+          </div>
 
+          <div class="ads-grid">
+            <article class="ads-card">
+              <div class="ads-card-num">01 / STRATEGY</div>
+              <h3>Campaign Strategy</h3>
+              <p>Clear targeting, campaign structure and creative direction built around the business objective, audience intent and conversion journey.</p>
+            </article>
+
+            <article class="ads-card">
+              <div class="ads-card-num">02 / EXECUTION</div>
+              <h3>What Was Managed</h3>
+              <ul>
+                <?php foreach ($items as $item): ?>
+                  <li><?php echo htmlspecialchars($item); ?></li>
+                <?php endforeach; ?>
+              </ul>
+            </article>
+
+            <article class="ads-card">
+              <div class="ads-card-num">03 / CREATIVE</div>
+              <h3>Creative & Messaging</h3>
+              <p>Headlines, descriptions, creatives and calls-to-action are shaped around the audience stage, offer and campaign objective.</p>
+            </article>
+
+            <article class="ads-card">
+              <div class="ads-card-num">04 / RESULTS</div>
+              <h3>Performance Details</h3>
+              <p>Add verified campaign results here — leads, CTR, conversions, CPA, ROAS, reach or any other meaningful KPI.</p>
+            </article>
+          </div>
         </div>
-      </div>
 
+        <div class="ads-section">
+          <div class="ads-section-head">
+            <small>Campaign Gallery</small>
+            <h2>Visuals & <span class="ads-gradient">details.</span></h2>
+          </div>
 
-      <!-- PROJECT 04 -->
-      <!-- <div class="project reveal" data-tilt>
-    <img class="project-image"
-         src="img/projects/puritz-chem.jpg"
-         alt="Puritz Chem Project"
-         loading="lazy">
+          <div class="ads-gallery">
+            <?php for ($i = 1; $i <= 3; $i++): ?>
+              <div class="ads-shot">
+                <img src="ads-<?php echo $slug; ?>-<?php echo $i; ?>.png"
+                  alt="<?php echo htmlspecialchars($title); ?> screenshot <?php echo $i; ?>"
+                  onerror="this.style.display='none';this.nextElementSibling.style.display='grid';">
+                <div class="ads-shot-fallback" style="display:none">Add Image 0<?php echo $i; ?></div>
+              </div>
+            <?php endfor; ?>
+          </div>
+        </div>
 
-    <div class="big">04</div>
-
-    <div class="project-content">
-      <span class="project-tag">Corporate</span>
-
-      <h3>Puritz Chem</h3>
-
-      <p>Corporate Website • Business Branding</p>
-
-      <a href="#"
-         target="_blank"
-         rel="noopener">
-        View Project ↗
-      </a>
-    </div>
-  </div> -->
-
-
-      <!-- PROJECT 05 -->
-      <!-- <div class="project reveal" data-tilt>
-    <img class="project-image"
-         src="img/projects/gemcart.jpg"
-         alt="GEMCART Project"
-         loading="lazy">
-
-    <div class="big">05</div>
-
-    <div class="project-content">
-      <span class="project-tag">E-Commerce</span>
-
-      <h3>GEMCART</h3>
-
-      <p>Gaming Accessories • E-commerce Store</p>
-
-      <a href="#"
-         target="_blank"
-         rel="noopener">
-        View Project ↗
-      </a>
-    </div>
-  </div> -->
-
-      </div>
-      </div>
-    </section>
-
-    <section id="pricing">
-      <div class="container">
-        <div class="section-head reveal">
+        <div class="ads-cta">
           <div>
-            <div class="kicker">05 / Packages</div>
-            <h2>Simple pricing.<br><span class="gradient">Serious results.</span></h2>
+            <h3>Ready for the next campaign?</h3>
+            <p>Let's build a focused advertising strategy around your next growth goal.</p>
           </div>
+          <a href="index.php#contact">Start a Project ↗</a>
         </div>
-        <div class="pricing">
-          <div class="price reveal" data-tilt>
-            <h3>Starter</h3>
-            <div class="amount">₹9,999</div>
-            <p>For individuals and small businesses starting their digital journey.</p>
-            <ul>
-              <li>Landing / Basic Website</li>
-              <li>Responsive Design</li>
-              <li>Basic SEO Setup</li>
-              <li>Contact Form</li>
-            </ul><a class="btn btn-secondary magnetic" href="#contact">Get Started</a>
-          </div>
-          <div class="price featured reveal" data-tilt><span class="tag">POPULAR</span>
-            <h3>Professional</h3>
-            <div class="amount">₹19,999</div>
-            <p>For businesses that need a stronger online presence and premium design.</p>
-            <ul>
-              <li>Multi-section Website</li>
-              <li>Premium UI & Animations</li>
-              <li>SEO Foundation</li>
-              <li>Social Integration</li>
-            </ul><a class="btn btn-primary magnetic" href="#contact">Choose Plan</a>
-          </div>
-          <div class="price reveal" data-tilt>
-            <h3>Growth</h3>
-            <div class="amount">Custom</div>
-            <p>For brands looking for a complete digital strategy and ongoing growth.</p>
-            <ul>
-              <li>Website + Marketing</li>
-              <li>SEO & Social Strategy</li>
-              <li>Creative Content</li>
-              <li>Ongoing Support</li>
-            </ul><a class="btn btn-secondary magnetic" href="#contact">Let's Discuss</a>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <section>
-      <div class="container">
-        <div class="section-head reveal">
-          <div>
-            <div class="kicker">06 / Journey</div>
-            <h2>My digital<br><span class="gradient">journey.</span></h2>
-          </div>
-        </div>
-        <div class="journey">
-          <div class="jitem reveal"><small>2024 — PRESENT</small>
-            <h3>Freelance Web Developer & Social Media Manager</h3>
-            <p>Developing responsive websites and managing client’s social media presence through effective digital marketing strategies.</p>
-          </div>
-          <div class="jitem reveal"><small>2025 — 2026</small>
-            <h3>Career Evolution Edtech Institute</h3>
-            <p>Trained students in Basic Computer, Tally, Advanced Excel, and Digital Marketing, while managing Career Evolution as its Founder.</p>
-          </div>
-          <div class="jitem reveal"><small>3 Months Intership</small>
-            <h3>SEO & SMM Intern — Online Strikers</h3>
-            <p>Gained hands-on experience in SEO and social media marketing while supporting content, optimization, and audience engagement activities.</p>
-          </div>
-          <div class="jitem reveal"><small>2021 — PRESENT</small>
-            <h3>Video Editor</h3>
-            <p>Creating engaging and professional video content using CapCut, Adobe Premiere Pro, and After Effects.</p>
-          </div>
-          <div class="jitem reveal"><small>2020-2021</small>
-            <h3>Stock Market Trader</h3>
-            <p>Developed practical expertise in stock market analysis, trading strategies, and investment management.</p>
-          </div>
-        </div>
       </div>
 
-      <section id="process">
+      <!-- Same portfolio cursor experience, available before this branch exits. -->
+      <div class="ads-cursor-light" id="adsCursorLight"></div>
+      <div class="ads-cursor-dot" id="adsCursorDot"></div>
+      <div class="ads-cursor-ring" id="adsCursorRing"></div>
+
+      <script>
+        (() => {
+          const dot = document.getElementById('adsCursorDot');
+          const ring = document.getElementById('adsCursorRing');
+          const light = document.getElementById('adsCursorLight');
+          const fine = window.matchMedia('(pointer:fine)').matches;
+          if (!fine) return;
+          let x = innerWidth / 2,
+            y = innerHeight / 2,
+            rx = x,
+            ry = y;
+          addEventListener('pointermove', e => {
+            x = e.clientX;
+            y = e.clientY;
+          }, {
+            passive: true
+          });
+          document.querySelectorAll('a,button,.ads-card,.ads-cover,.ads-shot').forEach(el => {
+            el.addEventListener('pointerenter', () => ring.classList.add('hover'));
+            el.addEventListener('pointerleave', () => ring.classList.remove('hover'));
+          });
+          document.addEventListener('mousedown', () => ring.classList.add('click'));
+          document.addEventListener('mouseup', () => ring.classList.remove('click'));
+
+          function frame() {
+            rx += (x - rx) * .16;
+            ry += (y - ry) * .16;
+            dot.style.left = x + 'px';
+            dot.style.top = y + 'px';
+            ring.style.left = rx + 'px';
+            ring.style.top = ry + 'px';
+            light.style.left = x + 'px';
+            light.style.top = y + 'px';
+            requestAnimationFrame(frame);
+          }
+          frame();
+        })();
+      </script>
+    <?php
+    exit;
+  }
+    ?>
+
+    <div class="ambient-orb" id="ambientOrb" aria-hidden="true"></div>
+    <div class="page-loader" id="pageLoader" aria-hidden="true">
+      <div class="loader-mark">M<span>.</span></div>
+      <div class="loader-line"><i></i></div>
+    </div>
+
+    <div id="animated-bg"></div>
+    <div id="bg-obstacles" aria-hidden="true"></div>
+    <div id="particles"></div>
+    <div class="cursor-light" id="cursorLight"></div>
+    <div class="scroll-progress" id="scrollProgress"></div>
+    <div class="cursor-dot" id="cursorDot"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+    <div class="cursor-label" id="cursorLabel">VIEW</div>
+    <button class="back-top" id="backTop" aria-label="Back to top">↑</button>
+
+
+    <header>
+      <div class="container nav">
+        <a class="logo" href="#home">Mayank<span>.</span></a>
+        <div class="navlinks" id="navlinks">
+          <a href="#home">Home</a><a href="#about">About</a><a href="#skills">Skills</a>
+          <a href="#services">Services</a><a href="#projects">Projects</a><a href="#pricing">Pricing</a><a href="#process">Process</a><a href="#contact">Contact</a>
+        </div>
+        <div class="nav-tools"><button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">☾</button><a class="navcta magnetic" href="#contact">Let's Talk ↗</a></div>
+        <div class="menu" onclick="document.getElementById('navlinks').classList.toggle('open')">☰</div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero container" id="home">
+        <div class="reveal">
+          <div class="eyebrow"><span class="dot"></span> Available for freelance projects</div>
+          <h1>I Build <span class="gradient">Digital Experiences</span> That Grow Brands.</h1>
+          <p>I'm Mayank Garg — Freelancer, Digital Marketer & Web Developer. I create modern websites, digital strategies, visual identities and AI-powered solutions that help businesses stand out online.</p>
+          <div class="actions"><a class="btn btn-primary magnetic" href="#projects">View My Work →</a><a class="btn btn-secondary magnetic" href="#contact">Start a Project</a></div>
+        </div>
+        <div class="hero3d reveal" id="hero3d">
+          <div class="hero-anime-wrap" id="heroAnime">
+            <div class="hero-orbit"></div>
+            <div class="anime-glow"></div>
+            <img fetchpriority="high" decoding="async" class="hero-anime" src="hero.png" alt="Mayank Garg futuristic anime developer hero">
+            <div class="anime-scan"></div>
+            <div class="anime-float anime-float-1">✦ 10+ PROJECTS</div>
+            <div class="anime-float anime-float-2">AI • WEB • MARKETING</div>
+          </div>
+        </div>
+      </section>
+
+
+      <div class="premium-marquee" aria-hidden="true">
+        <div class="premium-track">
+          <span>WEB DEVELOPMENT ✦</span><span>SEO & MARKETING ✦</span><span>AI SOLUTIONS ✦</span><span>CREATIVE DESIGN ✦</span><span>WEB DEVELOPMENT ✦</span><span>SEO & MARKETING ✦</span><span>AI SOLUTIONS ✦</span><span>CREATIVE DESIGN ✦</span>
+        </div>
+      </div>
+
+      <section class="trust-strip" aria-label="Capabilities">
+        <div class="container trust-grid">
+          <div><strong>50+</strong><span>Digital Projects</span></div>
+          <div><strong>8+</strong><span>Happy Clients</span></div>
+          <div><strong>4+</strong><span>Core Services</span></div>
+          <div><strong>100%</strong><span>Custom Solutions</span></div>
+        </div>
+      </section>
+
+      <section id="about">
+        <div class="container about">
+          <div class="profile reveal">
+            <img loading="lazy" decoding="async" src="aboutme.png" alt="Mayank Garg">
+            <div class="badge">
+              <b>Mayank Garg</b><br>
+              <small>Digital Creator & Developer</small>
+            </div>
+          </div>
+          <div class="about-copy reveal">
+            <div class="kicker">01 / About Me</div>
+            <h2>Turning ideas into <span class="gradient">digital growth.</span></h2>
+            <p>I'm a multidisciplinary freelancer working across web development, digital marketing, design and emerging AI tools. My goal is simple: combine creativity with technology to build digital experiences that look premium and deliver real business value.</p>
+            <div class="stats">
+              <div class="stat"><b>10+</b><span>Projects</span></div>
+              <div class="stat"><b>8+</b><span>Clients</span></div>
+              <div class="stat"><b>10+</b><span>Skills</span></div>
+              <div class="stat"><b>100%</b><span>Creative</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== IMAGE LIGHTBOX ===== -->
+<div class="ads-lightbox" id="adsLightbox">
+
+  <button class="ads-lightbox-close" id="adsLightboxClose">
+    ×
+  </button>
+
+  <img id="adsLightboxImage" src="" alt="Campaign Preview">
+
+</div>
+
+      <section id="skills">
         <div class="container">
           <div class="section-head reveal">
             <div>
-              <div class="kicker">06 / Process</div>
-              <h2>A simple process.<br><span class="gradient">Better outcomes.</span></h2>
+              <div class="kicker">02 / Expertise</div>
+              <h2>Skills that make<br>ideas <span class="gradient">real.</span></h2>
             </div>
-            <p class="lead">From the first idea to launch and beyond, every project follows a clear, collaborative workflow.</p>
+            <p class="lead">A practical mix of technology, marketing and creative skills to take a project from concept to launch.</p>
           </div>
-          <div class="process-grid">
-            <article class="process-card reveal"><span>01</span>
-              <div class="process-icon">✦</div>
-              <h3>Discover</h3>
-              <p>Understand your goals, audience, competitors and the result the project needs to achieve.</p>
-            </article>
-            <article class="process-card reveal"><span>02</span>
-              <div class="process-icon">◈</div>
-              <h3>Design</h3>
-              <p>Shape the visual direction, user experience and content structure into a premium concept.</p>
-            </article>
-            <article class="process-card reveal"><span>03</span>
-              <div class="process-icon">⌁</div>
-              <h3>Build</h3>
-              <p>Develop a responsive, fast and polished digital experience with clean interactions.</p>
-            </article>
-            <article class="process-card reveal"><span>04</span>
-              <div class="process-icon">↗</div>
-              <h3>Launch & Grow</h3>
-              <p>Launch confidently, measure what matters and keep improving the digital presence.</p>
-            </article>
+          <div class="skills" id="skillCards">
+
+            <div class="skill reveal">
+
+              <div class="icon">💻</div>
+
+              <h3>Web Development</h3>
+
+              <p>
+                Responsive business, portfolio, e-commerce
+                and custom websites.
+              </p>
+
+              <div class="skill-line"></div>
+
+            </div>
+
+
+            <div class="skill reveal">
+
+              <div class="icon">📈</div>
+
+              <h3>Digital Marketing</h3>
+
+              <p>
+                SEO, social media, paid campaigns and
+                growth-focused strategies.
+              </p>
+
+              <div class="skill-line"></div>
+
+            </div>
+
+
+            <div class="skill reveal">
+
+              <div class="icon">🎨</div>
+
+              <h3>Graphic Design</h3>
+
+              <p>
+                Branding, social creatives, posters,
+                logos and visual systems.
+              </p>
+
+              <div class="skill-line"></div>
+
+            </div>
+
+
+            <div class="skill reveal">
+
+              <div class="icon">🤖</div>
+
+              <h3>AI & GenAI</h3>
+
+              <p>
+                AI-powered workflows, content creation
+                and creative automation.
+              </p>
+
+              <div class="skill-line"></div>
+
+            </div>
+
+            <div class="skill reveal">
+              <div class="icon">🎨</div>
+              <h3>UI/UX Design</h3>
+              <p>
+                Clean, modern and user-friendly interfaces
+                designed for better digital experiences.
+              </p>
+              <div class="skill-line"></div>
+            </div>
+
+            <div class="skill reveal">
+              <div class="icon">🌐</div>
+              <h3>WordPress Development</h3>
+              <p>
+                Professional WordPress websites with custom
+                layouts, responsive design and easy management.
+              </p>
+              <div class="skill-line"></div>
+            </div>
+
+            <div class="skill reveal">
+              <div class="icon">🛒</div>
+              <h3>E-Commerce</h3>
+              <p>
+                Modern online stores with attractive product
+                pages, smooth shopping experiences and conversions.
+              </p>
+              <div class="skill-line"></div>
+            </div>
+
+            <div class="skill reveal">
+              <div class="icon">🚀</div>
+              <h3>SEO &amp; Growth</h3>
+              <p>
+                Search optimization and growth strategies that
+                help websites reach the right audience.
+              </p>
+              <div class="skill-line"></div>
+            </div>
+
           </div>
         </div>
       </section>
 
-      <section id="contact">
+      <section id="services">
         <div class="container">
-          <div class="contact reveal">
+          <div class="section-head reveal">
             <div>
-              <div class="kicker">08 / Contact</div>
-              <h2>Have an idea?<br>Let's make it <span class="gradient">real.</span></h2>
-              <p>Tell me what you're building. Whether it's a website, brand, marketing campaign or something completely new — let's talk.</p>
+              <div class="kicker">03 / Services</div>
+              <h2>What I can do<br>for your <span class="gradient">business.</span></h2>
             </div>
-            <div class="form">
-              <?php if ($messageStatus != ""): ?><div class="status"><?php echo $messageStatus; ?></div><?php endif; ?>
-              <form method="POST">
-                <div class="row"><input name="name" type="text" placeholder="Your Name" required><input name="email" type="email" placeholder="Email Address" required></div>
-                <input name="subject" type="text" placeholder="Project Subject" required>
-                <textarea name="message" placeholder="Tell me about your project..." required></textarea>
-                <button class="send magnetic" name="send_message" type="submit">Send Message →</button>
-              </form>
+          </div>
+
+          <div class="services">
+
+            <!-- CARD 01 -->
+            <div class="service-card" data-number="01">
+              <div class="service-icon">💻</div>
+              <!-- <span class="service-number">01</span> -->
+
+
+
+              <h3>Web Development</h3>
+
+              <p>
+                High-performance, responsive and modern websites
+                designed to turn visitors into customers.
+              </p>
+
+              <div class="service-arrow">↗</div>
             </div>
+
+
+            <!-- CARD 02 -->
+            <div class="service-card" data-number="02">
+              <div class="service-icon">📈</div>
+              <!-- <span class="service-number">02</span> -->
+
+              <h3>SEO & Marketing</h3>
+
+              <p>
+                Improve visibility, reach the right audience
+                & turn digital attention into measurable growth.
+              </p>
+
+              <div class="service-arrow">↗</div>
+            </div>
+
+
+            <!-- CARD 03 -->
+            <div class="service-card" data-number="03">
+              <div class="service-icon">🎨</div>
+              <!-- <span class="service-number">03</span> -->
+
+              <h3>Social Media</h3>
+
+              <p>
+                Creative content, strategy and campaigns designed to
+                build a consistent and memorable online presence.
+              </p>
+
+              <div class="service-arrow">↗</div>
+            </div>
+
+
+            <!-- CARD 04 -->
+            <div class="service-card" data-number="04">
+              <div class="service-icon">🤖</div>
+              <!-- <span class="service-number">04</span> -->
+
+              <h3>Brand & Creative</h3>
+
+              <p>
+                Logos, visual identity, graphics and creative direction
+                that give your business a stronger personality.
+              </p>
+
+              <div class="service-arrow">↗</div>
+            </div>
+
           </div>
         </div>
       </section>
-  </main>
 
-  <footer>
-    <div class="container foot">
-      <div>© <?php echo date("Y"); ?> Mayank Garg. All rights reserved.</div>
-      <div class="social"><a href="https://www.instagram.com/mynk_garg_6?igsi=NTlhdnVodDhmdTcz&utm_source=qr">Instagram</a><a href="#">LinkedIn</a><a href="#">GitHub</a><a href="#">WhatsApp</a></div>
-    </div>
-  </footer>
+      <section id="projects">
+        <div class="container">
+          <div class="section-head reveal">
+            <div>
+              <div class="kicker">04 / Selected Work</div>
+              <h2>Projects I'm<br><span class="gradient">proud of.</span></h2>
+            </div>
+            <p class="lead">A selection of websites, digital brands and creative projects. Replace these with your live project links whenever you're ready.</p>
+          </div>
+          <div class="projects">
 
-  <script>
-    const reveals = document.querySelectorAll('.reveal');
-    const io = new IntersectionObserver(entries => entries.forEach(e => {
-      if (e.isIntersecting) e.target.classList.add('show')
-    }), {
-      threshold: .12
-    });
-    reveals.forEach(x => io.observe(x));
+            <!-- PROJECT 01 -->
+            <div class="project reveal" data-tilt>
 
-    const particles = document.getElementById('particles');
-    for (let i = 0; i < 45; i++) {
-      const p = document.createElement('i');
-      p.className = 'particle';
-      p.style.left = Math.random() * 100 + '%';
-      p.style.setProperty('--x', ((Math.random() - .5) * 180) + 'px');
-      p.style.setProperty('--d', (9 + Math.random() * 16) + 's');
-      p.style.animationDelay = (-Math.random() * 20) + 's';
-      particles.appendChild(p);
-    }
+              <img
+                class="project-image"
+                src="smd.png"
+                alt="SMD IIT Website">
 
-    const hero3d = document.getElementById('hero3d'),
-      heroAnime = document.getElementById('heroAnime'),
-      cursorLight = document.getElementById('cursorLight');
-    let heroTargetX = 0,
-      heroTargetY = 0,
-      heroX = 0,
-      heroY = 0;
-    if (hero3d && heroAnime) {
-      const moveHero = (e) => {
-        const r = hero3d.getBoundingClientRect();
-        heroTargetX = ((e.clientX - r.left) / r.width - .5);
-        heroTargetY = ((e.clientY - r.top) / r.height - .5);
-        heroAnime.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
-        heroAnime.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
-        hero3d.style.setProperty('--px', (heroTargetX * 70) + 'px');
-        hero3d.style.setProperty('--py', (heroTargetY * 55) + 'px');
-      };
-      hero3d.addEventListener('mousemove', moveHero);
-      hero3d.addEventListener('mouseleave', () => {
-        heroTargetX = 0;
-        heroTargetY = 0;
-        heroAnime.style.setProperty('--mx', '50%');
-        heroAnime.style.setProperty('--my', '50%');
-      });
-      const animateHero = () => {
-        heroX += (heroTargetX - heroX) * .09;
-        heroY += (heroTargetY - heroY) * .09;
-        const autoX = Math.sin(performance.now() / 2600) * .025,
-          autoY = Math.cos(performance.now() / 3100) * .018;
-        const x = heroX + autoX,
-          y = heroY + autoY;
-        heroAnime.style.transform = `rotateX(${y*-10}deg) rotateY(${x*14}deg) translate3d(${x*18}px,${y*12}px,28px)`;
-        requestAnimationFrame(animateHero);
-      };
-      animateHero();
-    }
+              <div class="big">01</div>
 
-    if (cursorLight && matchMedia('(pointer:fine)').matches) {
-      cursorLight.style.opacity = '.75';
-      window.addEventListener('mousemove', e => {
-        cursorLight.style.left = e.clientX + 'px';
-        cursorLight.style.top = e.clientY + 'px';
-      });
-    }
+              <div class="project-content">
 
-    // Give every floating particle a subtle mouse reaction.
-    window.addEventListener('mousemove', e => {
-      const mx = e.clientX / innerWidth - .5,
-        my = e.clientY / innerHeight - .5;
-      document.querySelectorAll('.particle').forEach((p, i) => {
-        if (i % 3 === 0) p.style.marginLeft = (mx * (i % 7 + 2)) + 'px';
-        if (i % 4 === 0) p.style.marginTop = (my * (i % 6 + 2)) + 'px';
-      });
-    });
-    window.addEventListener('mousemove', e => {
-      const mx = e.clientX / innerWidth - .5,
-        my = e.clientY / innerHeight - .5;
+                <span class="project-tag">
+                  Education Website
+                </span>
 
-      document.querySelectorAll('.particle').forEach((p, i) => {
-        if (i % 3 === 0) p.style.marginLeft = (mx * (i % 7 + 2)) + 'px';
-        if (i % 4 === 0) p.style.marginTop = (my * (i % 6 + 2)) + 'px';
-      });
-    });
+                <h3>
+                  S.M.D Institute of Information Technology
+                </h3>
+
+                <p>
+                  Digital Learner • CCC • O Level
+                </p>
+
+                <a
+                  href="https://smdiit.in/"
+                  target="_blank">
+                  View Project ↗
+                </a>
+
+              </div>
+
+            </div>
 
 
-    document.querySelectorAll('.navlinks a').forEach(a =>
-      a.addEventListener('click', () => {
-        document.getElementById('navlinks').classList.remove('open')
-      })
-    );
+            <!-- PROJECT 02 -->
+            <div class="project reveal" data-tilt>
+
+              <img
+                class="project-image"
+                src="career.png"
+                alt="Career Evolution">
+
+              <div class="big">02</div>
+
+              <div class="project-content">
+
+                <span class="project-tag">
+                  EdTech
+                </span>
+
+                <h3>
+                  Career Evolution
+                </h3>
+
+                <p>
+                  EdTech • Website • Digital Growth
+                </p>
+
+                <a href="https://careerevolution.in/">
+                  View Project ↗
+                </a>
+
+              </div>
+
+            </div>
 
 
-    /* =========================================
-       3D SKILLS MOUSE EFFECT
-    ========================================= */
+            <!-- PROJECT 03 -->
+            <div class="project reveal" data-tilt>
 
-    document.querySelectorAll('.skill').forEach(card => {
+              <img
+                class="project-image"
+                src="pmi.png"
+                alt="Positive Muslim India">
 
-      card.addEventListener('mousemove', function(e) {
+              <div class="big">03</div>
 
-        const rect = card.getBoundingClientRect();
+              <div class="project-content">
 
-        const x =
-          (e.clientX - rect.left) /
-          rect.width - 0.5;
+                <span class="project-tag">
+                  Foundation
+                </span>
 
-        const y =
-          (e.clientY - rect.top) /
-          rect.height - 0.5;
+                <h3>
+                  Positive Muslim India
+                </h3>
 
-        const rotateX = y * -12;
-        const rotateY = x * 14;
+                <p>
+                  Foundation Website • Social Impact
+                </p>
 
-        card.style.transform =
-          `translateY(-10px)
-             rotateX(${rotateX}deg)
-             rotateY(${rotateY}deg)
-             scale3d(1.02,1.02,1.02)`;
+                <a href="https://positivemuslimindia.com/">
+                  View Project ↗
+                </a>
 
-        card.style.setProperty(
-          '--sx',
-          ((x + 0.5) * 100) + '%'
-        );
+              </div>
 
-        card.style.setProperty(
-          '--sy',
-          ((y + 0.5) * 100) + '%'
-        );
-
-      });
+            </div>
 
 
-      card.addEventListener('mouseleave', function() {
+            <!-- PROJECT 04 -->
+            <div class="project reveal" data-tilt>
 
-        card.style.transform =
-          'translateY(0) rotateX(0) rotateY(0) scale3d(1,1,1)';
+              <img
+                class="project-image"
+                src="puritz.png"
+                alt="Puritz Chem">
 
-        card.style.setProperty('--sx', '50%');
-        card.style.setProperty('--sy', '50%');
+              <div class="big">04</div>
 
-      });
+              <div class="project-content">
 
-    });
+                <span class="project-tag">
+                  Corporate
+                </span>
 
-    /* ===== ADVANCED MOUSE SYSTEM ===== */
-    const cursorDot = document.getElementById('cursorDot');
-    const cursorRing = document.getElementById('cursorRing');
-    const cursorLabel = document.getElementById('cursorLabel');
-    const scrollProgress = document.getElementById('scrollProgress');
-    let mouseX = innerWidth / 2,
-      mouseY = innerHeight / 2,
-      ringX = mouseX,
-      ringY = mouseY;
-    if (matchMedia('(pointer:fine)').matches) {
-      document.body.classList.add('cursor-active');
-      window.addEventListener('mousemove', e => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        if (cursorDot) {
-          cursorDot.style.left = mouseX + 'px';
-          cursorDot.style.top = mouseY + 'px'
-        }
-      });
-      const cursorLoop = () => {
-        ringX += (mouseX - ringX) * .16;
-        ringY += (mouseY - ringY) * .16;
-        if (cursorRing) {
-          cursorRing.style.left = ringX + 'px';
-          cursorRing.style.top = ringY + 'px'
-        }
-        if (cursorLabel) {
-          cursorLabel.style.left = ringX + 'px';
-          cursorLabel.style.top = ringY + 'px'
-        }
-        requestAnimationFrame(cursorLoop);
-      };
-      cursorLoop();
-      document.addEventListener('mousedown', () => cursorRing?.classList.add('click'));
-      document.addEventListener('mouseup', () => cursorRing?.classList.remove('click'));
-      document.querySelectorAll('a,button,[data-tilt]').forEach(el => {
-        el.addEventListener('mouseenter', () => cursorRing?.classList.add('hover'));
-        el.addEventListener('mouseleave', () => cursorRing?.classList.remove('hover'));
-      });
-      document.querySelectorAll('.project').forEach(el => {
-        el.addEventListener('mouseenter', () => {
-          if (cursorLabel) cursorLabel.textContent = 'OPEN'
-        });
-        el.addEventListener('mouseleave', () => {
-          if (cursorLabel) cursorLabel.textContent = 'VIEW'
-        });
-      });
-    }
+                <h3>
+                  Puritz Chem
+                </h3>
 
-    /* Scroll progress */
-    const updateProgress = () => {
-      const max = document.documentElement.scrollHeight - innerHeight;
-      if (scrollProgress) scrollProgress.style.width = (max > 0 ? (scrollY / max) * 100 : 0) + '%';
-    };
-    addEventListener('scroll', updateProgress, {
-      passive: true
-    });
-    updateProgress();
+                <p>
+                  Corporate Website • Business Branding
+                </p>
 
-    /* Premium 3D card tilt + cursor light */
-    if (matchMedia('(pointer:fine)').matches) {
-      document.querySelectorAll('[data-tilt]').forEach(card => {
-        card.addEventListener('mousemove', e => {
-          const r = card.getBoundingClientRect();
-          const x = (e.clientX - r.left) / r.width - .5,
-            y = (e.clientY - r.top) / r.height - .5;
-          const strength = card.classList.contains('project') ? 10 : 7;
-          card.style.transform = `perspective(900px) rotateX(${-y*strength}deg) rotateY(${x*strength}deg) translateY(-6px)`;
-          card.style.setProperty('--spot-x', (x + .5) * 100 + '%');
-          card.style.setProperty('--spot-y', (y + .5) * 100 + '%');
-        });
-        card.addEventListener('mouseleave', () => card.style.transform = '');
-      });
-    }
+                <a href="https://www.puritzchem.com/">
+                  View Project ↗
+                </a>
 
-    /* Magnetic buttons */
-    if (matchMedia('(pointer:fine)').matches) {
-      document.querySelectorAll('.magnetic').forEach(btn => {
-        btn.addEventListener('mousemove', e => {
-          const r = btn.getBoundingClientRect();
-          const x = e.clientX - r.left - r.width / 2,
-            y = e.clientY - r.top - r.height / 2;
-          btn.style.transform = `translate(${x*.16}px,${y*.16}px)`;
-        });
-        btn.addEventListener('mouseleave', () => btn.style.transform = '');
-      });
-    }
+              </div>
 
-    /* Keep hero mouse movement buttery */
-    if (hero3d && heroAnime) {
-      hero3d.addEventListener('mousemove', e => {
-        const r = hero3d.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width - .5,
-          y = (e.clientY - r.top) / r.height - .5;
-        heroAnime.style.setProperty('--mx', (x + .5) * 100 + '%');
-        heroAnime.style.setProperty('--my', (y + .5) * 100 + '%');
-      });
-    }
+            </div>
 
 
-    /* ===== CREATE MOVING BACKGROUND OBSTACLES ===== */
-    const obstacleLayer = document.getElementById('bg-obstacles');
+            <!-- PROJECT 05 -->
+            <a href="?project=google-ads" class="project reveal" data-tilt style="display:block;color:inherit;text-decoration:none;">
+              <img class="project-image" src="googleadspreview.png" alt="Google Ads Campaign">
+              <div class="big">05</div>
+              <div class="project-content">
+                <span class="project-tag">Paid Advertising</span>
+                <h3>Google Ads</h3>
+                <p>Search Ads • PPC • Lead Generation</p>
+                <span class="project-link">View Project ↗</span>
+              </div>
+            </a>
 
-    if (obstacleLayer) {
-      const obstacleData = [
-        ['circle', '8%', '18%', '58px', 'obstacleFloat1', '0s', '.55'],
-        ['square', '22%', '72%', '42px', 'obstacleFloat2', '-4s', '.45'],
-        ['diamond', '38%', '30%', '34px', 'obstacleFloat3', '-8s', '.50'],
-        ['ring', '57%', '78%', '76px', 'obstacleFloat4', '-3s', '.38'],
-        ['cross', '76%', '20%', '52px', 'obstacleFloat2', '-11s', '.40'],
-        ['circle', '88%', '62%', '30px', 'obstacleFloat3', '-6s', '.55'],
-        ['diamond', '68%', '48%', '44px', 'obstacleFloat1', '-13s', '.42'],
-        ['ring', '13%', '48%', '88px', 'obstacleFloat4', '-9s', '.30'],
-        ['square', '48%', '88%', '28px', 'obstacleFloat2', '-15s', '.38'],
-        ['circle', '94%', '34%', '48px', 'obstacleFloat1', '-7s', '.36'],
-        ['cross', '31%', '10%', '30px', 'obstacleFloat3', '-17s', '.32'],
-        ['diamond', '4%', '84%', '38px', 'obstacleFloat2', '-5s', '.40']
-      ];
+            <!-- PROJECT 06 -->
+            <a href="?project=meta-ads" class="project reveal" data-tilt style="display:block;color:inherit;text-decoration:none;">
+              <img class="project-image" src="ads-meta.jpg" alt="Meta Ads Campaign">
+              <div class="big">06</div>
+              <div class="project-content">
+                <span class="project-tag">Paid Social</span>
+                <h3>Meta Ads</h3>
+                <p>Facebook • Instagram • Lead Generation</p>
+                <span class="project-link">View Project ↗</span>
+              </div>
+            </a>
 
-      obstacleData.forEach(([type, left, top, size, animation, delay, opacity]) => {
-        const el = document.createElement('span');
-        el.className = `bg-obstacle ${type}`;
-        el.style.setProperty('--left', left);
-        el.style.setProperty('--top', top);
-        el.style.setProperty('--size', size);
-        el.style.setProperty('--opacity', opacity);
-        el.style.animation = `${animation} ${11 + Math.random()*8}s ease-in-out infinite`;
-        el.style.animationDelay = delay;
-        obstacleLayer.appendChild(el);
-      });
+          </div>
+        </div>
+      </section>
 
-      // Subtle mouse parallax across the whole page.
-      if (matchMedia('(pointer:fine)').matches) {
-        let ox = 0,
-          oy = 0,
-          tx = 0,
-          ty = 0;
-        window.addEventListener('mousemove', e => {
-          tx = (e.clientX / innerWidth - .5) * 24;
-          ty = (e.clientY / innerHeight - .5) * 24;
-        }, {
-          passive: true
-        });
+      <section>
+        <div class="container">
+          <div class="section-head reveal">
+            <div>
+              <div class="kicker">06 / Journey</div>
+              <h2>My digital<br><span class="gradient">journey.</span></h2>
+            </div>
+          </div>
+          <div class="journey">
+            <div class="jitem reveal"><small>2024 — PRESENT</small>
+              <h3>Freelance Web Developer & Social Media Manager</h3>
+              <p>Developing responsive websites and managing client’s social media presence through effective digital marketing strategies.</p>
+            </div>
+            <div class="jitem reveal"><small>2025 — 2026</small>
+              <h3>Career Evolution Edtech Institute</h3>
+              <p>Trained students in Basic Computer, Tally, Advanced Excel, and Digital Marketing, while managing Career Evolution as its Founder.</p>
+            </div>
+            <div class="jitem reveal"><small>3 Months Intership</small>
+              <h3>SEO & SMM Intern — Online Strikers</h3>
+              <p>Gained hands-on experience in SEO and social media marketing while supporting content, optimization, and audience engagement activities.</p>
+            </div>
+            <div class="jitem reveal"><small>2021 — PRESENT</small>
+              <h3>Video Editor</h3>
+              <p>Creating engaging and professional video content using CapCut, Adobe Premiere Pro, and After Effects.</p>
+            </div>
+            <div class="jitem reveal"><small>2020-2021</small>
+              <h3>Stock Market Trader</h3>
+              <p>Developed practical expertise in stock market analysis, trading strategies, and investment management.</p>
+            </div>
+          </div>
+        </div>
 
-        const obstacleParallax = () => {
-          ox += (tx - ox) * .035;
-          oy += (ty - oy) * .035;
-          obstacleLayer.style.transform = `translate3d(${ox}px,${oy}px,0)`;
-          requestAnimationFrame(obstacleParallax);
-        };
-        obstacleParallax();
-      }
-    }
-    /* SERVICES 3D MOUSE EFFECT */
+        <section id="process">
+          <div class="container">
+            <div class="section-head reveal">
+              <div>
+                <div class="kicker">06 / Process</div>
+                <h2>A simple process.<br><span class="gradient">Better outcomes.</span></h2>
+              </div>
+              <p class="lead">From the first idea to launch and beyond, every project follows a clear, collaborative workflow.</p>
+            </div>
+            <div class="process-grid">
+              <article class="process-card reveal"><span>01</span>
+                <div class="process-icon">✦</div>
+                <h3>Discover</h3>
+                <p>Understand your goals, audience, competitors and the result the project needs to achieve.</p>
+              </article>
+              <article class="process-card reveal"><span>02</span>
+                <div class="process-icon">◈</div>
+                <h3>Design</h3>
+                <p>Shape the visual direction, user experience and content structure into a premium concept.</p>
+              </article>
+              <article class="process-card reveal"><span>03</span>
+                <div class="process-icon">⌁</div>
+                <h3>Build</h3>
+                <p>Develop a responsive, fast and polished digital experience with clean interactions.</p>
+              </article>
+              <article class="process-card reveal"><span>04</span>
+                <div class="process-icon">↗</div>
+                <h3>Launch & Grow</h3>
+                <p>Launch confidently, measure what matters and keep improving the digital presence.</p>
+              </article>
+            </div>
+          </div>
+        </section>
 
-    document.querySelectorAll('.service-card').forEach(card => {
+        <section id="contact">
+          <div class="container">
+            <div class="contact reveal">
+              <div>
+                <div class="kicker">08 / Contact</div>
+                <h2>Have an idea?<br>Let's make it <span class="gradient">real.</span></h2>
+                <p>Tell me what you're building. Whether it's a website, brand, marketing campaign or something completely new — let's talk.</p>
+              </div>
+              <div class="form">
+                <?php if ($messageStatus != ""): ?><div class="status"><?php echo $messageStatus; ?></div><?php endif; ?>
+                <form method="POST">
+                  <div class="row"><input name="name" type="text" placeholder="Your Name" required><input name="email" type="email" placeholder="Email Address" required></div>
+                  <input name="subject" type="text" placeholder="Project Subject" required>
+                  <textarea name="message" placeholder="Tell me about your project..." required></textarea>
+                  <button class="send magnetic" name="send_message" type="submit">Send Message →</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+    </main>
 
-      card.addEventListener('mousemove', function(e) {
+    <footer>
+      <div class="container foot">
+        <div>© <?php echo date("Y"); ?> Mayank Garg. All rights reserved.</div>
+        <div class="social"><a href="https://www.instagram.com/mynk_garg_6?igsi=NTlhdnVodDhmdTcz&utm_source=qr">Instagram</a>
+          <a href="https://www.linkedin.com/in/mayank-garg90/">LinkedIn</a>
+          <a href="#">GitHub</a>
+          <a href="#">WhatsApp</a>
+        </div>
+      </div>
+    </footer>
 
-        const rect = card.getBoundingClientRect();
+    <script>
+      (() => {
+        const fine = matchMedia('(pointer:fine)').matches;
+        const $ = s => document.querySelector(s),
+          $$ = s => [...document.querySelectorAll(s)];
 
-        const x = (e.clientX - rect.left) / rect.width - 0.5;
-        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        /* Reveal */
+        const reveals = $$('.reveal');
+        if ('IntersectionObserver' in window) {
+          const ro = new IntersectionObserver(es => es.forEach(e => {
+            if (e.isIntersecting) {
+              e.target.classList.add('show');
+              ro.unobserve(e.target)
+            }
+          }), {
+            threshold: .08,
+            rootMargin: '0px 0px -6% 0px'
+          });
+          reveals.forEach(x => ro.observe(x));
+        } else reveals.forEach(x => x.classList.add('show'));
 
-        const rotateX = y * -10;
-        const rotateY = x * 12;
-
-        card.style.transform =
-          `translateY(-12px)
-             rotateX(${rotateX}deg)
-             rotateY(${rotateY}deg)
-             scale(1.02)`;
-
-      });
-
-      card.addEventListener('mouseleave', function() {
-
-        card.style.transform =
-          'translateY(0) rotateX(0) rotateY(0) scale(1)';
-
-      });
-
-    });
-
-    /* ===== ULTIMATE PORTFOLIO UX ===== */
-    (() => {
-      const themeToggle = document.getElementById('themeToggle');
-      const savedTheme = localStorage.getItem('mayank-theme');
-      const applyTheme = dark => {
-        document.body.classList.toggle('dark', dark);
-        if (themeToggle) themeToggle.textContent = dark ? '☀' : '☾';
-      };
-      applyTheme(savedTheme === 'dark');
-      themeToggle?.addEventListener('click', () => {
-        const dark = !document.body.classList.contains('dark');
-        applyTheme(dark);
-        localStorage.setItem('mayank-theme', dark ? 'dark' : 'light');
-      });
-
-      const backTop = document.getElementById('backTop');
-      const updateBackTop = () => backTop?.classList.toggle('show', scrollY > 650);
-      addEventListener('scroll', updateBackTop, {
-        passive: true
-      });
-      updateBackTop();
-      backTop?.addEventListener('click', () => scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      }));
-
-      // Active section navigation
-      const navItems = [...document.querySelectorAll('.navlinks a')];
-      const sections = navItems.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
-      const navObserver = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            navItems.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id));
+        /* Particles: fewer on smaller screens, no mouse DOM loop */
+        const particles = $('#particles');
+        if (particles) {
+          const n = innerWidth < 650 ? 18 : innerWidth < 1000 ? 28 : 36,
+            f = document.createDocumentFragment();
+          for (let i = 0; i < n; i++) {
+            const p = document.createElement('i');
+            p.className = 'particle';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.setProperty('--x', ((Math.random() - .5) * 180) + 'px');
+            p.style.setProperty('--d', (9 + Math.random() * 16) + 's');
+            p.style.animationDelay = (-Math.random() * 20) + 's';
+            f.appendChild(p);
           }
+          particles.appendChild(f);
+        }
+
+        /* Hero */
+        const hero = $('#hero3d'),
+          heroImg = $('#heroAnime');
+        let hx = 0,
+          hy = 0,
+          tx = 0,
+          ty = 0,
+          heroVisible = true;
+        if (hero && heroImg && fine) {
+          hero.addEventListener('pointermove', e => {
+            const r = hero.getBoundingClientRect();
+            tx = (e.clientX - r.left) / r.width - .5;
+            ty = (e.clientY - r.top) / r.height - .5;
+            heroImg.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+            heroImg.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+          }, {
+            passive: true
+          });
+          hero.addEventListener('pointerleave', () => {
+            tx = ty = 0;
+            heroImg.style.setProperty('--mx', '50%');
+            heroImg.style.setProperty('--my', '50%')
+          });
+          if ('IntersectionObserver' in window) {
+            const hi = new IntersectionObserver(e => heroVisible = e[0].isIntersecting, {
+              threshold: 0
+            });
+            hi.observe(hero);
+          }
+        }
+
+        /* Cursor */
+        const dot = $('#cursorDot'),
+          ring = $('#cursorRing'),
+          label = $('#cursorLabel'),
+          light = $('#cursorLight');
+        let mx = innerWidth / 2,
+          my = innerHeight / 2,
+          rx = mx,
+          ry = my,
+          dirty = false;
+        if (fine) {
+          document.body.classList.add('cursor-active');
+          addEventListener('pointermove', e => {
+            mx = e.clientX;
+            my = e.clientY;
+            dirty = true
+          }, {
+            passive: true
+          });
+          document.addEventListener('mousedown', () => ring?.classList.add('click'));
+          document.addEventListener('mouseup', () => ring?.classList.remove('click'));
+          $$('a,button,[data-tilt]').forEach(el => {
+            el.addEventListener('pointerenter', () => ring?.classList.add('hover'));
+            el.addEventListener('pointerleave', () => ring?.classList.remove('hover'));
+          });
+          $$('.project').forEach(el => {
+            el.addEventListener('pointerenter', () => {
+              if (label) label.textContent = 'OPEN'
+            });
+            el.addEventListener('pointerleave', () => {
+              if (label) label.textContent = 'VIEW'
+            });
+          });
+        }
+
+        /* Card tilt: lighter and only while hovered */
+        if (fine) $$('.skill,.service-card,[data-tilt]').forEach(card => {
+          let r = null;
+          card.addEventListener('pointerenter', () => r = card.getBoundingClientRect(), {
+            passive: true
+          });
+          card.addEventListener('pointermove', e => {
+            if (!r) r = card.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width - .5,
+              y = (e.clientY - r.top) / r.height - .5;
+            const strength = card.classList.contains('project') ? 7 : card.classList.contains('skill') ? 7 : 6;
+            card.style.transform = `perspective(900px) rotateX(${-y*strength}deg) rotateY(${x*strength}deg) translateY(-5px) scale3d(1.01,1.01,1.01)`;
+            card.style.setProperty('--sx', ((x + .5) * 100) + '%');
+            card.style.setProperty('--sy', ((y + .5) * 100) + '%');
+          }, {
+            passive: true
+          });
+          card.addEventListener('pointerleave', () => {
+            card.style.transform = '';
+            card.style.setProperty('--sx', '50%');
+            card.style.setProperty('--sy', '50%');
+            r = null;
+          }, {
+            passive: true
+          });
         });
-      }, {
-        rootMargin: '-35% 0px -55% 0px',
-        threshold: 0
-      });
-      sections.forEach(s => navObserver.observe(s));
 
-      // Animate numeric trust metrics when they enter the viewport.
-      document.querySelectorAll('.trust-grid strong').forEach(el => {
-        const original = el.textContent.trim();
-        if (!/^\d+\+?$|^100%$/.test(original)) return;
-        const target = parseInt(original, 10);
-        let started = false;
-        const observer = new IntersectionObserver(entries => {
-          if (!entries[0].isIntersecting || started) return;
-          started = true;
-          const suffix = original.includes('%') ? '%' : original.includes('+') ? '+' : '';
-          const start = performance.now(),
-            duration = 1000;
-          const tick = now => {
-            const p = Math.min((now - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - p, 3);
-            el.textContent = Math.round(target * eased) + suffix;
-            if (p < 1) requestAnimationFrame(tick);
-          };
-          requestAnimationFrame(tick);
-          observer.disconnect();
-        }, {
-          threshold: .5
+        /* Magnetic buttons */
+        if (fine) $$('.magnetic').forEach(btn => {
+          let r = null;
+          btn.addEventListener('pointerenter', () => r = btn.getBoundingClientRect(), {
+            passive: true
+          });
+          btn.addEventListener('pointermove', e => {
+            if (!r) r = btn.getBoundingClientRect();
+            const x = e.clientX - r.left - r.width / 2,
+              y = e.clientY - r.top - r.height / 2;
+            btn.style.transform = `translate(${x*.10}px,${y*.10}px)`;
+          }, {
+            passive: true
+          });
+          btn.addEventListener('pointerleave', () => {
+            btn.style.transform = '';
+            r = null
+          }, {
+            passive: true
+          });
         });
-        observer.observe(el);
-      });
-    })();
-  </script>
 
-  <script>
-    /* ===== ULTRA POLISH INTERACTIONS ===== */
-    (() => {
-      const loader = document.getElementById('pageLoader');
-      const finishLoader = () => setTimeout(() => loader?.classList.add('done'), 350);
-      if (document.readyState === 'complete') finishLoader();
-      else window.addEventListener('load', finishLoader, {
-        once: true
-      });
-
-      // Hide header while scrolling down, reveal while scrolling up.
-      let lastY = scrollY;
-      const header = document.querySelector('header');
-      addEventListener('scroll', () => {
-        const y = scrollY;
-        if (y > 180 && y > lastY + 8) header?.classList.add('nav-hidden');
-        else if (y < lastY - 8) header?.classList.remove('nav-hidden');
-        if (y < 80) header?.classList.remove('nav-hidden');
-        header?.classList.toggle('scrolled', y > 30);
-        lastY = y;
-      }, {
-        passive: true
-      });
-
-      // Ambient light follows the pointer slowly.
-      const orb = document.getElementById('ambientOrb');
-      if (orb && matchMedia('(pointer:fine)').matches) {
-        addEventListener('mousemove', e => {
-          orb.style.transform = `translate3d(${e.clientX*.025}px,${e.clientY*.025}px,0)`;
+        /* Scroll UI: one passive listener + one RAF */
+        const progress = $('#scrollProgress'),
+          back = $('#backTop'),
+          header = $('header');
+        let lastY = scrollY,
+          ticking = false;
+        const scrollUI = () => {
+          const y = scrollY,
+            max = document.documentElement.scrollHeight - innerHeight;
+          if (progress) progress.style.width = (max > 0 ? y / max * 100 : 0) + '%';
+          if (back) back.classList.toggle('show', y > 650);
+          if (header) {
+            if (y > 180 && y > lastY + 8) header.classList.add('nav-hidden');
+            else if (y < lastY - 8 || y < 80) header.classList.remove('nav-hidden');
+            header.classList.toggle('scrolled', y > 30);
+          }
+          lastY = y;
+          ticking = false;
+        };
+        addEventListener('scroll', () => {
+          if (!ticking) {
+            ticking = true;
+            requestAnimationFrame(scrollUI)
+          }
         }, {
           passive: true
         });
-      }
+        scrollUI();
+        back?.addEventListener('click', () => scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        }));
 
-      // Add keyboard-friendly focus visibility.
-      document.querySelectorAll('a,button,input,textarea').forEach(el => {
-        el.addEventListener('focus', () => el.style.outline = '2px solid rgba(99,91,255,.55)');
-        el.addEventListener('blur', () => el.style.outline = '');
-      });
-    })();
-  </script>
+        /* Mobile nav */
+        $$('.navlinks a').forEach(a => a.addEventListener('click', () => $('#navlinks')?.classList.remove('open')));
 
-</body>
+        /* Active navigation */
+        const nav = $$('.navlinks a'),
+          secs = nav.map(a => $(a.getAttribute('href'))).filter(Boolean);
+        if ('IntersectionObserver' in window) {
+          const ni = new IntersectionObserver(es => es.forEach(e => {
+            if (e.isIntersecting) nav.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+          }), {
+            rootMargin: '-35% 0px -55% 0px'
+          });
+          secs.forEach(s => ni.observe(s));
+        }
+
+        /* Theme */
+        const toggle = $('#themeToggle'),
+          saved = localStorage.getItem('mayank-theme');
+        const theme = d => {
+          document.body.classList.toggle('dark', d);
+          if (toggle) toggle.textContent = d ? '☀' : '☾'
+        };
+        theme(saved === 'dark');
+        toggle?.addEventListener('click', () => {
+          const d = !document.body.classList.contains('dark');
+          theme(d);
+          localStorage.setItem('mayank-theme', d)
+        });
+
+        /* Trust counters */
+        $$('.trust-grid strong').forEach(el => {
+          const original = el.textContent.trim();
+          if (!/^\d+\+?$|^100%$/.test(original)) return;
+          const target = parseInt(original, 10),
+            suffix = original.includes('%') ? '%' : original.includes('+') ? '+' : '';
+          let done = false;
+          const run = () => {
+            if (done) return;
+            done = true;
+            const t = performance.now();
+            const tick = n => {
+              const p = Math.min((n - t) / 750, 1),
+                e = 1 - Math.pow(1 - p, 3);
+              el.textContent = Math.round(target * e) + suffix;
+              if (p < 1) requestAnimationFrame(tick)
+            };
+            requestAnimationFrame(tick);
+          };
+          if ('IntersectionObserver' in window) {
+            const ci = new IntersectionObserver(es => {
+              if (es[0].isIntersecting) {
+                run();
+                ci.disconnect()
+              }
+            }, {
+              threshold: .4
+            });
+            ci.observe(el)
+          } else run();
+        });
+
+        /* Single animation frame for cursor + hero only */
+        const frame = now => {
+          if (fine) {
+            if (dot && dirty) dot.style.transform = `translate3d(${mx}px,${my}px,0) translate(-50%,-50%)`;
+            if (ring) {
+              rx += (mx - rx) * .18;
+              ry += (my - ry) * .18;
+              ring.style.transform = `translate3d(${rx}px,${ry}px,0) translate(-50%,-50%)`;
+              if (label) label.style.transform = `translate3d(${rx}px,${ry}px,0) translate(-50%,-50%)`
+            }
+            if (light && dirty) light.style.transform = `translate3d(${mx}px,${my}px,0) translate(-50%,-50%)`;
+            dirty = false;
+          }
+          if (heroImg && heroVisible && fine) {
+            hx += (tx - hx) * .08;
+            hy += (ty - hy) * .08;
+            const x = hx + Math.sin(now / 2600) * .018,
+              y = hy + Math.cos(now / 3100) * .014;
+            heroImg.style.transform = `rotateX(${y*-8}deg) rotateY(${x*10}deg) translate3d(${x*12}px,${y*8}px,22px)`;
+          }
+          requestAnimationFrame(frame);
+        };
+        requestAnimationFrame(frame);
+
+        /* Loader */
+        const loader = $('#pageLoader'),
+          finish = () => setTimeout(() => loader?.classList.add('done'), 200);
+        if (document.readyState === 'complete') finish();
+        else addEventListener('load', finish, {
+          once: true
+        });
+      })();
+    </script>
+
+    <script>
+const adsLightbox = document.getElementById('adsLightbox');
+const adsLightboxImage = document.getElementById('adsLightboxImage');
+const adsLightboxClose = document.getElementById('adsLightboxClose');
+
+document.querySelectorAll('.ads-shot img').forEach(img => {
+
+  img.addEventListener('click', function(){
+
+    adsLightboxImage.src = this.src;
+    adsLightboxImage.alt = this.alt;
+
+    adsLightbox.classList.add('active');
+
+    document.body.style.overflow = 'hidden';
+
+  });
+
+});
+
+function closeAdsLightbox(){
+
+  adsLightbox.classList.remove('active');
+
+  document.body.style.overflow = '';
+
+  setTimeout(() => {
+    adsLightboxImage.src = '';
+  }, 250);
+
+}
+
+adsLightboxClose.addEventListener('click', closeAdsLightbox);
+
+adsLightbox.addEventListener('click', function(e){
+
+  if(e.target === adsLightbox){
+    closeAdsLightbox();
+  }
+
+});
+
+document.addEventListener('keydown', function(e){
+
+  if(e.key === 'Escape'){
+    closeAdsLightbox();
+  }
+
+});
+</script>
+
+    </body>
 
 </html>
