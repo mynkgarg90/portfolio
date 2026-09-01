@@ -3534,7 +3534,7 @@ Sent from your portfolio website
   if ($adsProject === 'google-ads' || $adsProject === 'meta-ads') {
     $isGoogle = $adsProject === 'google-ads';
     $title = $isGoogle ? 'Google Ads' : 'Meta Ads';
-    $image = $isGoogle ? 'ads-google.jpg' : 'ads-meta.jpg';
+    $image = $isGoogle ? 'google-preview.png' : 'ads-meta.png';
     $slug = $isGoogle ? 'google' : 'meta';
     $platform = $isGoogle ? 'Google Search • PPC • Lead Generation' : 'Facebook • Instagram • Lead Generation';
     $description = $isGoogle
@@ -4706,7 +4706,7 @@ Sent from your portfolio website
 
             <!-- PROJECT 05 -->
             <a href="?project=google-ads" class="project reveal" data-tilt style="display:block;color:inherit;text-decoration:none;">
-              <img class="project-image" src="googleadspreview.png" alt="Google Ads Campaign">
+              <img class="project-image" src="google-preview.png" alt="Google Ads Campaign">
               <div class="big">05</div>
               <div class="project-content">
                 <span class="project-tag">Paid Advertising</span>
