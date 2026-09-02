@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/vendor/autoload.php';
 // ============================================================
 // SINGLE FILE 3D PORTFOLIO WEBSITE
 // File: index.php
@@ -40,9 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
 
     // Email body
     $mailBody = "
-========================================
-NEW PORTFOLIO CONTACT MESSAGE
-========================================
+// ========================================NEW PORTFOLIO CONTACT MESSAGE========================================
 
 Name:
 $nameSafe
@@ -56,9 +55,7 @@ $subjectSafe
 Message:
 $messageSafe
 
-========================================
-Sent from your portfolio website
-========================================
+// ========================================Sent from your portfolio website========================================
 ";
 
     // Email headers
@@ -68,13 +65,37 @@ Sent from your portfolio website
     $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 
     // Send email
-    if (mail($adminEmail, $mailSubject, $mailBody, $headers)) {
+// Send email using Gmail SMTP
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-      $messageStatus = "Thanks $nameSafe! Your message has been sent successfully.";
-    } else {
+$mail = new PHPMailer(true);
 
-      $messageStatus = "Sorry! Message could not be sent. Please try again later.";
-    }
+try {
+    $mail->isSMTP();
+    $mail->Host       = 'smtp.gmail.com';
+    $mail->SMTPAuth   = true;
+    $mail->Username   = getenv('SMTP_USER');
+    $mail->Password   = getenv('SMTP_PASS');
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port       = 587;
+
+    $mail->setFrom(getenv('SMTP_USER'), 'Portfolio Contact Form');
+    $mail->addAddress($adminEmail);
+    $mail->addReplyTo($emailSafe, $nameSafe);
+
+    $mail->isHTML(false);
+    $mail->Subject = $mailSubject;
+    $mail->Body    = $mailBody;
+
+    $mail->send();
+
+    $messageStatus = "Thanks $nameSafe! Your message has been sent successfully.";
+
+} catch (Exception $e) {
+
+    $messageStatus = "Sorry! Message could not be sent. Please try again later.";
+}
   }
 }
 
