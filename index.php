@@ -80,6 +80,7 @@ Sent from your portfolio website
             $mail->Password   = getenv('SMTP_PASS');
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = 587;
+            $mail->Timeout    = 20;
 
             $mail->setFrom(
                 getenv('SMTP_USER'),
