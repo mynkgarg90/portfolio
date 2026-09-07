@@ -9,7 +9,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 // ==========================================
 
 // YAHAN APNI EMAIL ID LIKHO
-$adminEmail = "mynkgarg90@gmail.com";
+$adminEmail = getenv('MAIL_TO') ?: 'mynkgarg90@gmail.com';
 
 $messageStatus = "";
 
@@ -58,11 +58,11 @@ $messageSafe
 // ========================================Sent from your portfolio website========================================
 ";
 
-    // Email headers
-    $headers  = "From: Portfolio Website <" . $adminEmail . ">\r\n";
-    $headers .= "Reply-To: " . $emailSafe . "\r\n";
-    $headers .= "MIME-Version: 1.0\r\n";
-    $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+    // // Email headers
+    // $headers  = "From: Portfolio Website <" . $adminEmail . ">\r\n";
+    // $headers .= "Reply-To: " . $emailSafe . "\r\n";
+    // $headers .= "MIME-Version: 1.0\r\n";
+    // $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 
     // Send email
 // Send email using Gmail SMTP
