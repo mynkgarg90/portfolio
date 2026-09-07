@@ -3,48 +3,53 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+
 // ============================================================
 // SINGLE FILE 3D PORTFOLIO WEBSITE
 // File: index.php
 // ============================================================
+
 // ==========================================
 // CONTACT FORM EMAIL SETTINGS
 // ==========================================
 
-// YAHAN APNI EMAIL ID LIKHO
 $adminEmail = getenv('MAIL_TO') ?: 'mynkgarg90@gmail.com';
 
 $messageStatus = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
 
-  // Get form data
-  $name = trim($_POST["name"] ?? "");
-  $email = trim($_POST["email"] ?? "");
-  $subject = trim($_POST["subject"] ?? "");
-  $message = trim($_POST["message"] ?? "");
+    // Get form data
+    $name = trim($_POST["name"] ?? "");
+    $email = trim($_POST["email"] ?? "");
+    $subject = trim($_POST["subject"] ?? "");
+    $message = trim($_POST["message"] ?? "");
 
-  // Basic validation
-  if ($name === "" || $email === "" || $subject === "" || $message === "") {
+    // Basic validation
+    if ($name === "" || $email === "" || $subject === "" || $message === "") {
 
-    $messageStatus = "Please fill in all fields.";
-  } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $messageStatus = "Please fill in all fields.";
 
-    $messageStatus = "Please enter a valid email address.";
-  } else {
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
-    // Clean data
-    $nameSafe = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
-    $emailSafe = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
-    $subjectSafe = htmlspecialchars($subject, ENT_QUOTES, 'UTF-8');
-    $messageSafe = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+        $messageStatus = "Please enter a valid email address.";
 
-    // Email subject
-    $mailSubject = "New Portfolio Enquiry - " . $subjectSafe;
+    } else {
 
-    // Email body
-    $mailBody = "
-// ========================================NEW PORTFOLIO CONTACT MESSAGE========================================
+        // Clean data
+        $nameSafe = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+        $emailSafe = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
+        $subjectSafe = htmlspecialchars($subject, ENT_QUOTES, 'UTF-8');
+        $messageSafe = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+
+        // Email subject
+        $mailSubject = "New Portfolio Enquiry - " . $subjectSafe;
+
+        // Email body
+        $mailBody = "
+========================================
+NEW PORTFOLIO CONTACT MESSAGE
+========================================
 
 Name:
 $nameSafe
@@ -58,36 +63,47 @@ $subjectSafe
 Message:
 $messageSafe
 
+========================================
+Sent from your portfolio website
+========================================
+";
 
-// Send email using Gmail SMTP
-$mail = new PHPMailer(true);
+        // Send email using Gmail SMTP
+        $mail = new PHPMailer(true);
 
-try {
-    $mail->isSMTP();
-    $mail->Host       = 'smtp.gmail.com';
-    $mail->SMTPAuth   = true;
-    $mail->Username   = getenv('SMTP_USER');
-    $mail->Password   = getenv('SMTP_PASS');
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->Port       = 587;
+        try {
 
-    $mail->setFrom(getenv('SMTP_USER'), 'Portfolio Contact Form');
-    $mail->addAddress($adminEmail);
-    $mail->addReplyTo($emailSafe, $nameSafe);
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = getenv('SMTP_USER');
+            $mail->Password   = getenv('SMTP_PASS');
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = 587;
 
-    $mail->isHTML(false);
-    $mail->Subject = $mailSubject;
-    $mail->Body    = $mailBody;
+            $mail->setFrom(
+                getenv('SMTP_USER'),
+                'Portfolio Contact Form'
+            );
 
-    $mail->send();
+            $mail->addAddress($adminEmail);
+            $mail->addReplyTo($email, $name);
 
-    $messageStatus = "Thanks $nameSafe! Your message has been sent successfully.";
+            $mail->isHTML(false);
+            $mail->Subject = $mailSubject;
+            $mail->Body    = $mailBody;
 
-} catch (Exception $e) {
+            $mail->send();
 
-    $messageStatus = "Sorry! Message could not be sent. Please try again later.";
-}
-  }
+            $messageStatus = "Thanks $name! Your message has been sent successfully.";
+
+        } catch (Exception $e) {
+
+            error_log("PHPMailer Error: " . $mail->ErrorInfo);
+
+            $messageStatus = "Sorry! Message could not be sent. Please try again later.";
+        }
+    }
 }
 
 ?>
