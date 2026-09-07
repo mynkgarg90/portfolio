@@ -1,16 +1,11 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
 
 // ============================================================
-// SINGLE FILE 3D PORTFOLIO WEBSITE
-// File: index.php
-// ============================================================
-
-// ==========================================
 // CONTACT FORM EMAIL SETTINGS
-// ==========================================
+// ============================================================
 
 $adminEmail = getenv('MAIL_TO') ?: 'mynkgarg90@gmail.com';
+$resendApiKey = getenv('RESEND_API_KEY');
 
 $messageStatus = "";
 
@@ -31,75 +26,89 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
 
         $messageStatus = "Please enter a valid email address.";
 
+    } elseif (!$resendApiKey) {
+
+        $messageStatus = "Email service is not configured.";
+
     } else {
 
         // Clean data
         $nameSafe = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
         $emailSafe = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
         $subjectSafe = htmlspecialchars($subject, ENT_QUOTES, 'UTF-8');
-        $messageSafe = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+        $messageSafe = nl2br(
+            htmlspecialchars($message, ENT_QUOTES, 'UTF-8')
+        );
 
         // Email subject
         $mailSubject = "New Portfolio Enquiry - " . $subjectSafe;
 
-        // Email body
-        $mailBody = "
-========================================
-NEW PORTFOLIO CONTACT MESSAGE
-========================================
+        // Email HTML
+        $mailHtml = "
+        <div style='font-family:Arial,sans-serif;line-height:1.6;'>
+            <h2>New Portfolio Contact Message</h2>
 
-Name:
-$nameSafe
+            <p><strong>Name:</strong><br>
+            {$nameSafe}</p>
 
-Email:
-$emailSafe
+            <p><strong>Email:</strong><br>
+            {$emailSafe}</p>
 
-Subject:
-$subjectSafe
+            <p><strong>Subject:</strong><br>
+            {$subjectSafe}</p>
 
-Message:
-$messageSafe
+            <p><strong>Message:</strong><br>
+            {$messageSafe}</p>
 
-========================================
-Sent from your portfolio website
-========================================
-";
+            <hr>
 
-        // Send email using Gmail SMTP
-        $mail = new PHPMailer(true);
+            <p style='color:#777;'>
+                Sent from your portfolio website
+            </p>
+        </div>
+        ";
 
-        try {
+        // Send email using Resend API
+        $ch = curl_init('https://api.resend.com/emails');
 
-            $mail->isSMTP();
-            $mail->Host       = 'smtp.gmail.com';
-            $mail->SMTPAuth   = true;
-            $mail->Username   = getenv('SMTP_USER');
-            $mail->Password   = getenv('SMTP_PASS');
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = 587;
-            $mail->Timeout    = 20;
+        $payload = json_encode([
+            'from' => 'Portfolio Contact <onboarding@resend.dev>',
+            'to' => [$adminEmail],
+            'reply_to' => [$email],
+            'subject' => $mailSubject,
+            'html' => $mailHtml
+        ]);
 
-            $mail->setFrom(
-                getenv('SMTP_USER'),
-                'Portfolio Contact Form'
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer ' . $resendApiKey,
+                'Content-Type: application/json'
+            ],
+            CURLOPT_POSTFIELDS => $payload,
+            CURLOPT_TIMEOUT => 20
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+
+        curl_close($ch);
+
+        if ($httpCode >= 200 && $httpCode < 300) {
+
+            $messageStatus =
+                "Thanks $name! Your message has been sent successfully.";
+
+        } else {
+
+            error_log(
+                "Resend Error: HTTP $httpCode | CURL: $curlError | Response: $response"
             );
 
-            $mail->addAddress($adminEmail);
-            $mail->addReplyTo($email, $name);
-
-            $mail->isHTML(false);
-            $mail->Subject = $mailSubject;
-            $mail->Body    = $mailBody;
-
-            $mail->send();
-
-            $messageStatus = "Thanks $name! Your message has been sent successfully.";
-
-        } catch (Exception $e) {
-
-            error_log("PHPMailer Error: " . $mail->ErrorInfo);
-
-            $messageStatus = "Sorry! Message could not be sent. Please try again later.";
+            $messageStatus =
+                "Sorry! Message could not be sent. Please try again later.";
         }
     }
 }
