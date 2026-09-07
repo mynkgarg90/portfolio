@@ -1,5 +1,8 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 // ============================================================
 // SINGLE FILE 3D PORTFOLIO WEBSITE
 // File: index.php
@@ -66,8 +69,7 @@ $messageSafe
 
     // Send email
 // Send email using Gmail SMTP
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+
 
 $mail = new PHPMailer(true);
 
