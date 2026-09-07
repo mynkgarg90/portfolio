@@ -58,19 +58,8 @@ $subjectSafe
 Message:
 $messageSafe
 
-// ========================================Sent from your portfolio website========================================
-";
 
-    // // Email headers
-    // $headers  = "From: Portfolio Website <" . $adminEmail . ">\r\n";
-    // $headers .= "Reply-To: " . $emailSafe . "\r\n";
-    // $headers .= "MIME-Version: 1.0\r\n";
-    // $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-
-    // Send email
 // Send email using Gmail SMTP
-
-
 $mail = new PHPMailer(true);
 
 try {
