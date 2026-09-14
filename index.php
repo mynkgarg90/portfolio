@@ -11,40 +11,37 @@ $messageStatus = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
 
-    // Get form data
-    $name = trim($_POST["name"] ?? "");
-    $email = trim($_POST["email"] ?? "");
-    $subject = trim($_POST["subject"] ?? "");
-    $message = trim($_POST["message"] ?? "");
+  // Get form data
+  $name = trim($_POST["name"] ?? "");
+  $email = trim($_POST["email"] ?? "");
+  $subject = trim($_POST["subject"] ?? "");
+  $message = trim($_POST["message"] ?? "");
 
-    // Basic validation
-    if ($name === "" || $email === "" || $subject === "" || $message === "") {
+  // Basic validation
+  if ($name === "" || $email === "" || $subject === "" || $message === "") {
 
-        $messageStatus = "Please fill in all fields.";
+    $messageStatus = "Please fill in all fields.";
+  } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $messageStatus = "Please enter a valid email address.";
+  } elseif (!$resendApiKey) {
 
-        $messageStatus = "Please enter a valid email address.";
+    $messageStatus = "Email service is not configured.";
+  } else {
 
-    } elseif (!$resendApiKey) {
+    // Clean data
+    $nameSafe = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+    $emailSafe = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
+    $subjectSafe = htmlspecialchars($subject, ENT_QUOTES, 'UTF-8');
+    $messageSafe = nl2br(
+      htmlspecialchars($message, ENT_QUOTES, 'UTF-8')
+    );
 
-        $messageStatus = "Email service is not configured.";
+    // Email subject
+    $mailSubject = "New Portfolio Enquiry - " . $subjectSafe;
 
-    } else {
-
-        // Clean data
-        $nameSafe = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
-        $emailSafe = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
-        $subjectSafe = htmlspecialchars($subject, ENT_QUOTES, 'UTF-8');
-        $messageSafe = nl2br(
-            htmlspecialchars($message, ENT_QUOTES, 'UTF-8')
-        );
-
-        // Email subject
-        $mailSubject = "New Portfolio Enquiry - " . $subjectSafe;
-
-        // Email HTML
-        $mailHtml = "
+    // Email HTML
+    $mailHtml = "
         <div style='font-family:Arial,sans-serif;line-height:1.6;'>
             <h2>New Portfolio Contact Message</h2>
 
@@ -68,49 +65,48 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
         </div>
         ";
 
-        // Send email using Resend API
-        $ch = curl_init('https://api.resend.com/emails');
+    // Send email using Resend API
+    $ch = curl_init('https://api.resend.com/emails');
 
-        $payload = json_encode([
-            'from' => 'Portfolio Contact <onboarding@resend.dev>',
-            'to' => [$adminEmail],
-            'reply_to' => [$email],
-            'subject' => $mailSubject,
-            'html' => $mailHtml
-        ]);
+    $payload = json_encode([
+      'from' => 'Portfolio Contact <onboarding@resend.dev>',
+      'to' => [$adminEmail],
+      'reply_to' => [$email],
+      'subject' => $mailSubject,
+      'html' => $mailHtml
+    ]);
 
-        curl_setopt_array($ch, [
-            CURLOPT_POST => true,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER => [
-                'Authorization: Bearer ' . $resendApiKey,
-                'Content-Type: application/json'
-            ],
-            CURLOPT_POSTFIELDS => $payload,
-            CURLOPT_TIMEOUT => 20
-        ]);
+    curl_setopt_array($ch, [
+      CURLOPT_POST => true,
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer ' . $resendApiKey,
+        'Content-Type: application/json'
+      ],
+      CURLOPT_POSTFIELDS => $payload,
+      CURLOPT_TIMEOUT => 20
+    ]);
 
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curlError = curl_error($ch);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
 
-        curl_close($ch);
+    curl_close($ch);
 
-        if ($httpCode >= 200 && $httpCode < 300) {
+    if ($httpCode >= 200 && $httpCode < 300) {
 
-            $messageStatus =
-                "Thanks $name! Your message has been sent successfully.";
+      $messageStatus =
+        "Thanks $name! Your message has been sent successfully.";
+    } else {
 
-        } else {
+      error_log(
+        "Resend Error: HTTP $httpCode | CURL: $curlError | Response: $response"
+      );
 
-            error_log(
-                "Resend Error: HTTP $httpCode | CURL: $curlError | Response: $response"
-            );
-
-            $messageStatus =
-                "Sorry! Message could not be sent. Please try again later.";
-        }
+      $messageStatus =
+        "Sorry! Message could not be sent. Please try again later.";
     }
+  }
 }
 
 ?>
@@ -3558,6 +3554,1361 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
         filter: drop-shadow(0 20px 35px rgba(20, 35, 90, .20))
       }
     }
+
+
+    /* ============================================================
+   3D PRICING SECTION — PORTFOLIO
+   ============================================================ */
+    .pricing-3d-section {
+      position: relative;
+      overflow: hidden;
+      padding: 120px 0 130px;
+    }
+
+    .pricing-3d-section::before,
+    .pricing-3d-section::after {
+      content: "";
+      position: absolute;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: .16;
+      pointer-events: none;
+    }
+
+    .pricing-3d-section::before {
+      left: -220px;
+      top: 120px;
+      background: #6c63ff
+    }
+
+    .pricing-3d-section::after {
+      right: -220px;
+      bottom: 60px;
+      background: #00c8ff
+    }
+
+    .pricing-3d-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 30px;
+      margin-bottom: 55px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .pricing-3d-head-copy {
+      max-width: 700px
+    }
+
+    .pricing-3d-head-copy h2 {
+      margin: 10px 0 0
+    }
+
+    .pricing-3d-subtitle {
+      max-width: 560px;
+      margin: 18px 0 0;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .pricing-3d-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px;
+      perspective: 1800px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .price-card-3d {
+      --mx: 50%;
+      --my: 50%;
+      position: relative;
+      min-height: 570px;
+      padding: 38px;
+      border: 1px solid rgba(120, 130, 170, .20);
+      border-radius: 34px;
+      background: linear-gradient(145deg, rgba(255, 255, 255, .94), rgba(244, 246, 255, .76));
+      box-shadow: 0 25px 70px rgba(25, 35, 80, .12), inset 0 1px 0 rgba(255, 255, 255, .9);
+      transform-style: preserve-3d;
+      will-change: transform;
+      transition: transform .18s ease-out, box-shadow .35s ease, border-color .35s ease;
+      overflow: hidden;
+    }
+
+    .price-card-3d::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at var(--mx) var(--my), rgba(108, 99, 255, .17), transparent 34%);
+      opacity: 0;
+      transition: opacity .35s ease;
+      pointer-events: none;
+    }
+
+    .price-card-3d::after {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      border-radius: 33px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, .62), transparent 40%, rgba(255, 255, 255, .15));
+      pointer-events: none;
+    }
+
+    .price-card-3d:hover {
+      box-shadow: 0 38px 90px rgba(25, 35, 80, .19), 0 0 0 1px rgba(108, 99, 255, .12), inset 0 1px 0 #fff;
+      border-color: rgba(108, 99, 255, .30);
+    }
+
+    .price-card-3d:hover::before {
+      opacity: 1
+    }
+
+    .price-card-3d>* {
+      position: relative;
+      z-index: 3;
+      transform: translateZ(35px)
+    }
+
+    .price-card-3d.featured {
+      margin-top: -18px;
+      margin-bottom: -18px;
+      background: linear-gradient(150deg, #171a38 0%, #24255a 48%, #172e55 100%);
+      color: #fff;
+      border: 1px solid rgba(122, 220, 255, .42);
+      box-shadow: 0 42px 110px rgba(30, 35, 90, .30), 0 0 55px rgba(77, 179, 255, .13);
+    }
+
+    .price-card-3d.featured::before {
+      background: radial-gradient(circle at var(--mx) var(--my), rgba(0, 210, 255, .24), transparent 35%);
+    }
+
+    .price-card-3d.featured::after {
+      background: linear-gradient(135deg, rgba(255, 255, 255, .13), transparent 42%, rgba(105, 225, 255, .08))
+    }
+
+    .price-card-3d.featured:hover {
+      border-color: rgba(122, 220, 255, .7);
+      box-shadow: 0 50px 120px rgba(20, 25, 75, .4), 0 0 70px rgba(0, 200, 255, .17)
+    }
+
+    .price-orb {
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      right: -62px;
+      top: -62px;
+      background: linear-gradient(135deg, rgba(108, 99, 255, .28), rgba(0, 210, 255, .05));
+      filter: blur(.2px);
+      box-shadow: inset -20px -20px 40px rgba(255, 255, 255, .45), inset 12px 12px 25px rgba(108, 99, 255, .13);
+      transform: translateZ(55px);
+      pointer-events: none;
+    }
+
+    .price-card-3d.featured .price-orb {
+      background: linear-gradient(135deg, rgba(0, 210, 255, .38), rgba(108, 99, 255, .08));
+      box-shadow: inset -20px -20px 40px rgba(0, 0, 0, .15), inset 12px 12px 25px rgba(255, 255, 255, .12)
+    }
+
+    .price-plan-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 35px
+    }
+
+    .price-plan {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      opacity: .72
+    }
+
+    .price-badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      background: rgba(108, 99, 255, .10);
+      color: var(--blue);
+    }
+
+    .featured .price-badge {
+      background: rgba(255, 255, 255, .11);
+      color: #8eeaff;
+      border: 1px solid rgba(142, 234, 255, .22)
+    }
+
+    .price-value {
+      display: flex;
+      align-items: flex-start;
+      gap: 5px;
+      margin-bottom: 9px
+    }
+
+    .price-currency {
+      font-size: 21px;
+      font-weight: 800;
+      margin-top: 9px;
+      opacity: .7
+    }
+
+    .price-number {
+      font-size: 58px;
+      line-height: .95;
+      font-weight: 900;
+      letter-spacing: -.06em
+    }
+
+    .price-plus {
+      font-size: 22px;
+      margin-top: 6px;
+      opacity: .55;
+      font-weight: 800
+    }
+
+    .price-period {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 28px
+    }
+
+    .featured .price-period {
+      color: rgba(255, 255, 255, .58)
+    }
+
+    .price-desc {
+      min-height: 57px;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+      margin-bottom: 28px
+    }
+
+    .featured .price-desc {
+      color: rgba(255, 255, 255, .66)
+    }
+
+    .price-divider {
+      height: 1px;
+      background: var(--line);
+      margin-bottom: 25px
+    }
+
+    .featured .price-divider {
+      background: rgba(255, 255, 255, .13)
+    }
+
+    .price-features {
+      display: grid;
+      gap: 14px;
+      margin: 0;
+      padding: 0;
+      list-style: none
+    }
+
+    .price-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #34394d
+    }
+
+    .featured .price-features li {
+      color: rgba(255, 255, 255, .84)
+    }
+
+    .price-check {
+      width: 21px;
+      height: 21px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 21px;
+      border-radius: 50%;
+      background: rgba(108, 99, 255, .10);
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 900
+    }
+
+    .featured .price-check {
+      background: rgba(142, 234, 255, .12);
+      color: #8eeaff
+    }
+
+    .price-cta {
+      position: absolute !important;
+      left: 38px;
+      right: 38px;
+      bottom: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      padding: 0 18px;
+      border-radius: 17px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .02em;
+      color: #fff;
+      background: linear-gradient(135deg, #6960ff, #2a9dff);
+      box-shadow: 0 14px 30px rgba(74, 91, 220, .22);
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+
+    .price-cta:hover {
+      transform: translateZ(45px) translateY(-3px);
+      box-shadow: 0 20px 38px rgba(74, 91, 220, .32)
+    }
+
+    .price-card-3d:not(.featured) .price-cta {
+      color: #fff
+    }
+
+    .price-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin: 35px auto 0;
+      position: relative;
+      z-index: 2
+    }
+
+    .price-note strong {
+      color: var(--text)
+    }
+
+    @media(max-width:1000px) {
+      .pricing-3d-grid {
+        grid-template-columns: 1fr
+      }
+
+      .price-card-3d {
+        min-height: 530px
+      }
+
+      .price-card-3d.featured {
+        margin: 0
+      }
+
+      .pricing-3d-head {
+        display: block
+      }
+
+      .pricing-3d-subtitle {
+        max-width: 700px
+      }
+    }
+
+    @media(max-width:650px) {
+      .pricing-3d-section {
+        padding: 90px 0
+      }
+
+      .pricing-3d-grid {
+        gap: 18px
+      }
+
+      .price-card-3d {
+        padding: 29px;
+        min-height: 545px;
+        border-radius: 29px
+      }
+
+      .price-card-3d>* {
+        transform: translateZ(20px)
+      }
+
+      .price-number {
+        font-size: 50px
+      }
+
+      .price-cta {
+        left: 29px;
+        right: 29px;
+        bottom: 29px
+      }
+
+      .price-orb {
+        width: 120px;
+        height: 120px
+      }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+
+      .price-card-3d,
+      .price-cta {
+        transition: none !important
+      }
+    }
+  </style>
+
+
+  <style>
+    /* ===== Premium Portfolio Additions ===== */
+    .ce-case-section,
+    .ce-tools-section,
+    .ce-why-section,
+    .ce-faq-section,
+    .ce-cta-section {
+      position: relative;
+      overflow: hidden
+    }
+
+    .ce-case-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 22px;
+      margin-top: 42px
+    }
+
+    .ce-case {
+      position: relative;
+      min-height: 360px;
+      padding: 32px;
+      border: 1px solid var(--line, rgba(255, 255, 255, .12));
+      border-radius: 28px;
+      background: linear-gradient(145deg, rgba(255, 255, 255, .075), rgba(255, 255, 255, .025));
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .16);
+      transform-style: preserve-3d;
+      transition: transform .45s cubic-bezier(.2, .8, .2, 1), border-color .35s, box-shadow .35s
+    }
+
+    .ce-case:before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      background: radial-gradient(380px circle at var(--cx, 50%) var(--cy, 50%), rgba(255, 198, 70, .16), transparent 45%);
+      pointer-events: none
+    }
+
+    .ce-case:hover {
+      transform: translateY(-8px) rotateX(2deg) rotateY(-2deg);
+      border-color: rgba(255, 198, 70, .35);
+      box-shadow: 0 35px 90px rgba(0, 0, 0, .25)
+    }
+
+    .ce-case-no {
+      font-size: 12px;
+      letter-spacing: .18em;
+      opacity: .55
+    }
+
+    .ce-case h3 {
+      font-size: 30px;
+      margin: 16px 0 10px
+    }
+
+    .ce-case p {
+      max-width: 620px;
+      line-height: 1.75;
+      opacity: .72
+    }
+
+    .ce-case-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 22px 0
+    }
+
+    .ce-case-tags span,
+    .ce-tool {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid var(--line, rgba(255, 255, 255, .1));
+      font-size: 12px
+    }
+
+    .ce-case-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: inherit;
+      text-decoration: none;
+      font-weight: 700
+    }
+
+    .ce-case-link:hover {
+      gap: 12px
+    }
+
+    .ce-tools {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      margin-top: 38px
+    }
+
+    .ce-tool {
+      min-height: 92px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-weight: 700;
+      transition: transform .3s, background .3s
+    }
+
+    .ce-tool:hover {
+      transform: translateY(-6px) rotateX(5deg);
+      background: rgba(255, 255, 255, .1)
+    }
+
+    .ce-why-grid {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 28px;
+      align-items: stretch;
+      margin-top: 38px
+    }
+
+    .ce-why-main,
+    .ce-why-list {
+      border: 1px solid var(--line, rgba(255, 255, 255, .12));
+      border-radius: 28px;
+      background: linear-gradient(145deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, .025));
+      padding: 34px
+    }
+
+    .ce-why-main h3 {
+      font-size: 34px;
+      margin: 8px 0 14px
+    }
+
+    .ce-why-main p {
+      line-height: 1.8;
+      opacity: .72
+    }
+
+    .ce-reasons {
+      display: grid;
+      gap: 14px
+    }
+
+    .ce-reason {
+      display: flex;
+      gap: 15px;
+      padding: 17px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .045);
+      border: 1px solid rgba(255, 255, 255, .06)
+    }
+
+    .ce-reason b {
+      display: block;
+      margin-bottom: 4px
+    }
+
+    .ce-reason small {
+      opacity: .62;
+      line-height: 1.5
+    }
+
+    .ce-faq-list {
+      max-width: 900px;
+      margin: 40px auto 0;
+      display: grid;
+      gap: 12px
+    }
+
+    .ce-faq {
+      border: 1px solid var(--line, rgba(255, 255, 255, .12));
+      border-radius: 20px;
+      background: rgba(255, 255, 255, .045);
+      overflow: hidden
+    }
+
+    .ce-faq button {
+      width: 100%;
+      padding: 22px 24px;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      text-align: left;
+      font: inherit;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer
+    }
+
+    .ce-faq button span:last-child {
+      font-size: 24px;
+      transition: transform .3s
+    }
+
+    .ce-faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      padding: 0 24px;
+      opacity: .68;
+      line-height: 1.7;
+      transition: max-height .35s, padding .35s
+    }
+
+    .ce-faq.open .ce-faq-answer {
+      max-height: 180px;
+      padding: 0 24px 22px
+    }
+
+    .ce-faq.open button span:last-child {
+      transform: rotate(45deg)
+    }
+
+    .ce-cta {
+      position: relative;
+      text-align: center;
+      padding: 70px 30px;
+      border: 1px solid rgba(255, 198, 70, .22);
+      border-radius: 34px;
+      background: radial-gradient(500px circle at 50% 0, rgba(255, 198, 70, .15), transparent 60%), linear-gradient(145deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, .025));
+      box-shadow: 0 30px 90px rgba(0, 0, 0, .18)
+    }
+
+    .ce-cta h2 {
+      font-size: clamp(38px, 6vw, 76px);
+      line-height: .98;
+      margin: 12px auto 18px;
+      max-width: 850px
+    }
+
+    .ce-cta p {
+      max-width: 650px;
+      margin: 0 auto 28px;
+      opacity: .7;
+      line-height: 1.7
+    }
+
+    .ce-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 22px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: inherit;
+      background: var(--text, #fff);
+      color: var(--bg, #0a0a0a);
+      font-weight: 800
+    }
+
+    @media(max-width:900px) {
+
+      .ce-case-grid,
+      .ce-why-grid {
+        grid-template-columns: 1fr
+      }
+
+      .ce-tools {
+        grid-template-columns: repeat(3, 1fr)
+      }
+    }
+
+    @media(max-width:600px) {
+      .ce-case {
+        min-height: auto;
+        padding: 24px
+      }
+
+      .ce-case h3 {
+        font-size: 25px
+      }
+
+      .ce-tools {
+        grid-template-columns: repeat(2, 1fr)
+      }
+
+      .ce-tool {
+        min-height: 75px
+      }
+
+      .ce-why-main,
+      .ce-why-list {
+        padding: 24px
+      }
+
+      .ce-cta {
+        padding: 50px 20px;
+        border-radius: 26px
+      }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+
+      .ce-case,
+      .ce-tool {
+        transition: none
+      }
+
+      .ce-case:hover,
+      .ce-tool:hover {
+        transform: none
+      }
+    }
+  </style>
+
+
+  <style>
+    /* ============================================================
+   MAYANK TOOLKIT — REFERENCE LAYOUT / PORTFOLIO THEME
+   Uses the existing portfolio theme variables.
+   No separate background and no hero image.
+   ============================================================ */
+    .mg-toolkit-section {
+      position: relative;
+      min-height: 850px;
+      padding: 0;
+      overflow: hidden;
+      isolation: isolate;
+      color: var(--ink);
+    }
+
+    /* Very subtle theme-matched atmosphere; the portfolio background stays visible */
+    .mg-toolkit-section:before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 52%, rgba(99, 91, 255, .10), transparent 30%),
+        radial-gradient(circle at 20% 45%, rgba(24, 160, 251, .055), transparent 24%),
+        radial-gradient(circle at 82% 58%, rgba(155, 92, 255, .055), transparent 25%);
+    }
+
+    .mg-toolkit-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 1500px;
+      width: 94%;
+      margin: auto;
+    }
+
+    .mg-toolkit-top {
+      height: 78px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+      position: relative;
+      z-index: 20;
+    }
+
+    .mg-toolkit-label,
+    .mg-toolkit-note {
+      font: 700 11px "Space Grotesk", sans-serif;
+      letter-spacing: 2.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .mg-toolkit-label {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .mg-toolkit-label span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--blue);
+      box-shadow: 0 0 14px rgba(99, 91, 255, .65);
+    }
+
+    .mg-toolkit-note {
+      color: var(--blue)
+    }
+
+    .mg-toolkit-stage {
+      height: 710px;
+      position: top;
+      perspective: 1500px;
+      transform-style: preserve-3d;
+    }
+
+    /* Reference-inspired central typography, but using portfolio colours */
+    .mg-toolkit-title{
+  position:absolute;
+  z-index:5;
+  left:50%;
+  top:145px;
+  transform:translateX(-50%);
+  width:min(760px,90%);
+  text-align:center;
+  pointer-events:none;
+  text-transform:uppercase;
+  font-family:"Space Grotesk",sans-serif;
+  line-height:.86;
+  letter-spacing:-4px;
+}
+.mg-toolkit-title span{
+  display:block;
+  font-size:clamp(44px,6vw,84px);
+  color:var(--ink);
+  text-shadow:0 0 28px rgba(99,91,255,.10);
+}
+.mg-toolkit-title strong{
+  display:block;
+  margin-top:8px;
+  font-family:Georgia,"Times New Roman",serif;
+  font-style:italic;
+  font-size:clamp(50px,6.7vw,94px);
+  background:linear-gradient(90deg,var(--blue),var(--purple),var(--cyan));
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  text-shadow:none;
+}
+
+    /* Central toolkit hub */
+    .mg-toolkit-hub {
+      position: absolute;
+      left: 50%;
+      top: 55%;
+      width: 190px;
+      height: 190px;
+      transform: translate(-50%, -50%);
+      border: 1px solid rgba(99, 91, 255, .34);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      z-index: 4;
+      pointer-events: none;
+      background: radial-gradient(circle, rgba(99, 91, 255, .07), transparent 68%);
+      box-shadow: 0 0 55px rgba(99, 91, 255, .08), inset 0 0 35px rgba(99, 91, 255, .05);
+    }
+
+    .mg-toolkit-hub:before,
+    .mg-toolkit-hub:after {
+      content: "";
+      position: absolute;
+      border: 1px solid rgba(99, 91, 255, .16);
+      border-radius: 50%;
+    }
+
+    .mg-toolkit-hub:before {
+      inset: 15px
+    }
+
+    .mg-toolkit-hub:after {
+      inset: -22px;
+      border-style: dashed;
+      opacity: .55
+    }
+
+    .mg-toolkit-hub span {
+      font: 700 10px "Space Grotesk", sans-serif;
+      letter-spacing: 3px;
+      color: var(--blue);
+    }
+
+    .mg-toolkit-orbit {
+      position: absolute;
+      left: 50%;
+      top: 55%;
+      border: 1px solid rgba(99, 91, 255, .20);
+      border-radius: 50%;
+      pointer-events: none;
+      transform-style: preserve-3d;
+      box-shadow: 0 0 28px rgba(99, 91, 255, .035);
+    }
+
+    .mg-toolkit-orbit-a {
+      width: 470px;
+      height: 220px;
+      transform: translate(-50%, -50%) rotate(-8deg)
+    }
+
+    .mg-toolkit-orbit-b {
+      width: 710px;
+      height: 300px;
+      transform: translate(-50%, -50%) rotate(13deg);
+      opacity: .7
+    }
+
+    .mg-toolkit-orbit-c {
+      width: 900px;
+      height: 390px;
+      transform: translate(-50%, -50%) rotate(-17deg);
+      opacity: .42
+    }
+
+    /* Floating cards match the existing portfolio glass/card language */
+    .mg-tool-card {
+      position: absolute;
+      z-index: 12;
+      min-width: 145px;
+      min-height: 58px;
+      padding: 8px 13px 8px 9px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      border: 1px solid var(--glass-line);
+      background: var(--glass);
+      box-shadow: 0 16px 40px rgba(40, 50, 100, .09);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: var(--ink);
+      border-radius: 14px;
+      transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px));
+      transition: transform .22s cubic-bezier(.2, .8, .2, 1), border-color .25s, box-shadow .25s, background .25s;
+      will-change: transform;
+    }
+
+    .mg-tool-card:before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(120deg, rgba(99, 91, 255, .08), transparent 58%);
+      pointer-events: none;
+    }
+
+    .mg-tool-card:hover {
+      border-color: rgba(99, 91, 255, .38);
+      box-shadow: 0 20px 55px rgba(45, 55, 120, .14), 0 0 24px rgba(99, 91, 255, .08);
+      transform: translate3d(var(--hover-x, 0px), var(--hover-y, -7px), 45px) scale(1.035);
+    }
+
+    .mg-tool-icon {
+      width: 35px;
+      height: 35px;
+      flex: 0 0 35px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(99, 91, 255, .25);
+      background: rgba(99, 91, 255, .08);
+      color: var(--blue);
+      font: 700 9px "Space Grotesk", sans-serif;
+      letter-spacing: .3px;
+      border-radius: 9px;
+    }
+
+    .mg-tool-card b {
+      position: relative;
+      z-index: 1;
+      font: 600 11px "Space Grotesk", sans-serif;
+      white-space: nowrap;
+      letter-spacing: .2px;
+    }
+
+    /* Desktop placement — asymmetric like the reference */
+    .mg-tool-1 {
+      left: 7%;
+      top: 27%
+    }
+
+    .mg-tool-2 {
+      left: 20%;
+      top: 10%
+    }
+
+    .mg-tool-3 {
+      left: 38%;
+      top: 22%
+    }
+
+    .mg-tool-4 {
+      right: 19%;
+      top: 12%
+    }
+
+    .mg-tool-5 {
+      right: 6%;
+      top: 29%
+    }
+
+    .mg-tool-6 {
+      right: 27%;
+      top: 37%
+    }
+
+    .mg-tool-7 {
+      right: 5%;
+      top: 55%
+    }
+
+    .mg-tool-8 {
+      right: 16%;
+      bottom: 17%
+    }
+
+    .mg-tool-9 {
+      left: 45%;
+      bottom: 13%
+    }
+
+    .mg-tool-10 {
+      left: 39%;
+      bottom: 5%
+    }
+
+    .mg-tool-11 {
+      left: 28%;
+      bottom: 17%
+    }
+
+    .mg-tool-12 {
+      left: 15%;
+      bottom: 19%
+    }
+
+    .mg-tool-13 {
+      left: 27%;
+      top: 34%
+    }
+
+    .mg-tool-14 {
+      left: 6%;
+      top: 56%
+    }
+
+    .mg-toolkit-bottom {
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font: 700 9px "Space Grotesk", sans-serif;
+      letter-spacing: 2px;
+      position: relative;
+      z-index: 20;
+    }
+
+    .mg-toolkit-bottom span:last-child {
+      color: var(--blue)
+    }
+
+    /* Dark mode automatically follows the portfolio's existing theme */
+    body.dark .mg-toolkit-section:before {
+      background:
+        radial-gradient(circle at 50% 52%, rgba(99, 91, 255, .13), transparent 30%),
+        radial-gradient(circle at 20% 45%, rgba(24, 160, 251, .06), transparent 24%),
+        radial-gradient(circle at 82% 58%, rgba(155, 92, 255, .06), transparent 25%);
+    }
+
+    body.dark .mg-tool-card {
+      background: rgba(17, 23, 45, .72);
+      border-color: rgba(120, 130, 255, .18);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, .22);
+    }
+
+    body.dark .mg-tool-card:hover {
+      background: rgba(21, 29, 54, .88);
+      border-color: rgba(120, 130, 255, .42);
+      box-shadow: 0 20px 55px rgba(0, 0, 0, .34), 0 0 24px rgba(99, 91, 255, .10);
+    }
+
+    body.dark .mg-toolkit-title span {
+      color: #f5f7ff
+    }
+
+    body.dark .mg-toolkit-orbit {
+      border-color: rgba(120, 130, 255, .22)
+    }
+
+    @media(max-width:1000px) {
+      .mg-toolkit-section {
+        min-height: 760px
+      }
+
+      .mg-toolkit-stage {
+        height: 625px
+      }
+
+      .mg-tool-card {
+        min-width: 125px;
+        min-height: 52px;
+        padding: 7px 10px 7px 7px;
+        gap: 8px
+      }
+
+      .mg-tool-icon {
+        width: 30px;
+        height: 30px;
+        flex-basis: 30px;
+        font-size: 8px
+      }
+
+      .mg-tool-card b {
+        font-size: 9px
+      }
+
+      .mg-tool-1 {
+        left: 2%;
+        top: 28%
+      }
+
+      .mg-tool-2 {
+        left: 16%;
+        top: 9%
+      }
+
+      .mg-tool-3 {
+        left: 36%;
+        top: 22%
+      }
+
+      .mg-tool-4 {
+        right: 15%;
+        top: 9%
+      }
+
+      .mg-tool-5 {
+        right: 1%;
+        top: 29%
+      }
+
+      .mg-tool-6 {
+        right: 23%;
+        top: 38%
+      }
+
+      .mg-tool-7 {
+        right: 1%;
+        top: 56%
+      }
+
+      .mg-tool-8 {
+        right: 10%;
+        bottom: 14%
+      }
+
+      .mg-tool-9 {
+        left: 42%;
+        bottom: 11%
+      }
+
+      .mg-tool-10 {
+        left: 37%;
+        bottom: 3%
+      }
+
+      .mg-tool-11 {
+        left: 25%;
+        bottom: 16%
+      }
+
+      .mg-tool-12 {
+        left: 10%;
+        bottom: 18%
+      }
+
+      .mg-tool-13 {
+        left: 23%;
+        top: 33%
+      }
+
+      .mg-tool-14 {
+        left: 1%;
+        top: 56%
+      }
+    }
+
+    @media(max-width:650px) {
+      .mg-toolkit-section {
+        min-height: 700px
+      }
+
+      .mg-toolkit-inner {
+        width: 94%
+      }
+
+      .mg-toolkit-top {
+        height: 62px
+      }
+
+      .mg-toolkit-stage {
+        height: 580px
+      }
+
+      .mg-toolkit-title {
+        top: 62px;
+        letter-spacing: -2px
+      }
+
+      .mg-toolkit-title span {
+        font-size: 31px
+      }
+
+      .mg-toolkit-title strong {
+        font-size: 37px
+      }
+
+      .mg-toolkit-hub {
+        width: 135px;
+        height: 135px;
+        top: 55%
+      }
+
+      .mg-toolkit-orbit-a {
+        width: 300px;
+        height: 160px
+      }
+
+      .mg-toolkit-orbit-b {
+        width: 440px;
+        height: 205px
+      }
+
+      .mg-toolkit-orbit-c {
+        width: 550px;
+        height: 265px
+      }
+
+      .mg-tool-card {
+        min-width: 0;
+        width: auto;
+        min-height: 42px;
+        padding: 5px 8px 5px 5px;
+        gap: 6px
+      }
+
+      .mg-tool-card b {
+        font-size: 7px
+      }
+
+      .mg-tool-icon {
+        width: 24px;
+        height: 24px;
+        flex-basis: 24px;
+        font-size: 6px
+      }
+
+      .mg-tool-1 {
+        left: 0;
+        top: 25%
+      }
+
+      .mg-tool-2 {
+        left: 17%;
+        top: 13%
+      }
+
+      .mg-tool-3 {
+        left: 37%;
+        top: 25%
+      }
+
+      .mg-tool-4 {
+        right: 13%;
+        top: 13%
+      }
+
+      .mg-tool-5 {
+        right: 0;
+        top: 26%
+      }
+
+      .mg-tool-6 {
+        right: 14%;
+        top: 39%
+      }
+
+      .mg-tool-7 {
+        right: 0;
+        top: 57%
+      }
+
+      .mg-tool-8 {
+        right: 6%;
+        bottom: 12%
+      }
+
+      .mg-tool-9 {
+        left: 39%;
+        bottom: 10%
+      }
+
+      .mg-tool-10 {
+        left: 34%;
+        bottom: 3%
+      }
+
+      .mg-tool-11 {
+        left: 22%;
+        bottom: 15%
+      }
+
+      .mg-tool-12 {
+        left: 6%;
+        bottom: 18%
+      }
+
+      .mg-tool-13 {
+        left: 21%;
+        top: 35%
+      }
+
+      .mg-tool-14 {
+        left: 0;
+        top: 56%
+      }
+
+      .mg-toolkit-note {
+        display: none
+      }
+
+      .mg-toolkit-bottom {
+        height: 52px;
+        font-size: 7px
+      }
+    }
+
+    @media(max-width:430px) {
+      .mg-toolkit-stage {
+        height: 545px
+      }
+
+      .mg-toolkit-title span {
+        font-size: 27px
+      }
+
+      .mg-toolkit-title strong {
+        font-size: 33px
+      }
+
+      .mg-toolkit-hub {
+        width: 115px;
+        height: 115px
+      }
+
+      .mg-tool-card b {
+        font-size: 6.5px
+      }
+
+      .mg-tool-3,
+      .mg-tool-6,
+      .mg-tool-9,
+      .mg-tool-11 {
+        display: none
+      }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      .mg-tool-card {
+        transition: none
+      }
+    }
   </style>
 
 </head>
@@ -4386,15 +5737,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
       </section>
 
       <!-- ===== IMAGE LIGHTBOX ===== -->
-<div class="ads-lightbox" id="adsLightbox">
+      <div class="ads-lightbox" id="adsLightbox">
 
-  <button class="ads-lightbox-close" id="adsLightboxClose">
-    ×
-  </button>
+        <button class="ads-lightbox-close" id="adsLightboxClose">
+          ×
+        </button>
 
-  <img id="adsLightboxImage" src="" alt="Campaign Preview">
+        <img id="adsLightboxImage" src="" alt="Campaign Preview">
 
-</div>
+      </div>
 
       <section id="skills">
         <div class="container">
@@ -4763,6 +6114,250 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
               </div>
             </a>
 
+          </div>
+        </div>
+      </section>
+
+
+
+      <!-- =====================================================
+           07 / PRICING — 3D SERVICE PACKAGES
+           ===================================================== -->
+      <section id="pricing" class="pricing-3d-section">
+        <div class="container">
+          <div class="pricing-3d-head reveal">
+            <div class="pricing-3d-head-copy">
+              <div class="kicker">07 / Pricing</div>
+              <h2>Choose the right<br><span class="gradient">way to grow.</span></h2>
+              <p class="pricing-3d-subtitle">Flexible packages for websites, digital marketing and creative projects — built around your goals, not unnecessary extras.</p>
+            </div>
+          </div>
+
+          <div class="pricing-3d-grid">
+            <article class="price-card-3d reveal" data-price-tilt>
+              <span class="price-orb" aria-hidden="true"></span>
+              <div class="price-plan-row">
+                <span class="price-plan">Starter</span>
+                <span class="price-badge">For Small Projects</span>
+              </div>
+              <div class="price-value"><span class="price-currency">₹</span><span class="price-number">4,999</span><span class="price-plus">+</span></div>
+              <div class="price-period">Starting price · final quote after discussion</div>
+              <p class="price-desc">A clean, focused digital setup for individuals and small businesses ready to get online.</p>
+              <div class="price-divider"></div>
+              <ul class="price-features">
+                <li><span class="price-check">✓</span>Responsive landing page / basic website</li>
+                <li><span class="price-check">✓</span>Modern UI & mobile optimization</li>
+                <li><span class="price-check">✓</span>Basic SEO setup</li>
+                <li><span class="price-check">✓</span>Contact / enquiry integration</li>
+                <li><span class="price-check">✓</span>Post-launch guidance</li>
+              </ul>
+              <a class="price-cta magnetic" href="#contact">Start a Project <span>→</span></a>
+            </article>
+
+            <article class="price-card-3d featured reveal" data-price-tilt>
+              <span class="price-orb" aria-hidden="true"></span>
+              <div class="price-plan-row">
+                <span class="price-plan">Professional</span>
+                <span class="price-badge">Most Popular</span>
+              </div>
+              <div class="price-value"><span class="price-currency">₹</span><span class="price-number">9,999</span><span class="price-plus">+</span></div>
+              <div class="price-period">Starting price · tailored to your project</div>
+              <p class="price-desc">The balanced package for brands that need a premium website plus a stronger digital presence.</p>
+              <div class="price-divider"></div>
+              <ul class="price-features">
+                <li><span class="price-check">✓</span>Premium multi-section website</li>
+                <li><span class="price-check">✓</span>Advanced responsive UI & interactions</li>
+                <li><span class="price-check">✓</span>On-page SEO foundation</li>
+                <li><span class="price-check">✓</span>Social media / content direction</li>
+                <li><span class="price-check">✓</span>Performance & conversion optimization</li>
+                <li><span class="price-check">✓</span>Priority support & revisions</li>
+              </ul>
+              <a class="price-cta magnetic" href="#contact">Let's Build It <span>→</span></a>
+            </article>
+
+            <article class="price-card-3d reveal" data-price-tilt>
+              <span class="price-orb" aria-hidden="true"></span>
+              <div class="price-plan-row">
+                <span class="price-plan">Premium</span>
+                <span class="price-badge">Custom</span>
+              </div>
+              <div class="price-value"><span class="price-currency">₹</span><span class="price-number">19,999</span><span class="price-plus">+</span></div>
+              <div class="price-period">Starting price · custom strategy & scope</div>
+              <p class="price-desc">A complete digital experience for businesses that want strategy, design, development and growth together.</p>
+              <div class="price-divider"></div>
+              <ul class="price-features">
+                <li><span class="price-check">✓</span>Custom premium website / web experience</li>
+                <li><span class="price-check">✓</span>Advanced animations & 3D interactions</li>
+                <li><span class="price-check">✓</span>SEO & conversion strategy</li>
+                <li><span class="price-check">✓</span>Digital marketing roadmap</li>
+                <li><span class="price-check">✓</span>Creative / content support</li>
+                <li><span class="price-check">✓</span>Long-term optimization support</li>
+              </ul>
+              <a class="price-cta magnetic" href="#contact">Go Premium <span>→</span></a>
+            </article>
+          </div>
+          <p class="price-note">Need something different? <strong>Every package can be customized</strong> according to your project.</p>
+        </div>
+      </section>
+
+
+
+      <section id="case-studies" class="ce-case-section">
+        <div class="container">
+          <div class="section-head reveal">
+            <div>
+              <div class="kicker">05 / Case Studies</div>
+              <h2>Work with a<br><span class="gradient">purpose.</span></h2>
+            </div>
+            <p class="lead">Selected projects shown as outcomes and digital experiences — not just screenshots.</p>
+          </div>
+          <div class="ce-case-grid">
+            <article class="ce-case reveal" data-ce-case>
+              <div class="ce-case-no">CASE 01 · WEB</div>
+              <h3>Positive Muslim India</h3>
+              <p>A content-led digital platform concept focused on positive stories, heritage, history, research and community contribution.</p>
+              <div class="ce-case-tags"><span>UI/UX</span><span>WordPress</span><span>Content Structure</span><span>Responsive</span></div>
+              <a class="ce-case-link" href="#contact">Discuss a similar project <span>↗</span></a>
+            </article>
+            <article class="ce-case reveal" data-ce-case>
+              <div class="ce-case-no">CASE 02 · WEB</div>
+              <h3>Puritz Chem</h3>
+              <p>A professional business website direction built around clear services, credibility, structured information and a modern visual presence.</p>
+              <div class="ce-case-tags"><span>Business Website</span><span>UI Design</span><span>Development</span><span>Mobile First</span></div>
+              <a class="ce-case-link" href="#contact">Build your business site <span>↗</span></a>
+            </article>
+            <article class="ce-case reveal" data-ce-case>
+              <div class="ce-case-no">CASE 03 · ADS</div>
+              <h3>Google Ads Campaigns</h3>
+              <p>Performance-focused campaign work covering targeting, keyword intent, ad messaging and optimization for measurable lead generation.</p>
+              <div class="ce-case-tags"><span>Google Ads</span><span>Lead Gen</span><span>Optimization</span><span>Analytics</span></div>
+              <a class="ce-case-link" href="#contact">Plan a campaign <span>↗</span></a>
+            </article>
+            <article class="ce-case reveal" data-ce-case>
+              <div class="ce-case-no">CASE 04 · CREATIVE</div>
+              <h3>Meta & Social Media</h3>
+              <p>Creative-first social media work combining content ideas, visual design and campaign thinking to build a stronger digital presence.</p>
+              <div class="ce-case-tags"><span>Meta Ads</span><span>Social Media</span><span>Creative</span><span>Strategy</span></div>
+              <a class="ce-case-link" href="#contact">Grow your social presence <span>↗</span></a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           08 / TOOLKIT — INTERACTIVE SKILL UNIVERSE
+           ===================================================== -->
+      <section id="tools" class="mg-toolkit-section">
+        <div class="mg-toolkit-grid" aria-hidden="true"></div>
+        <div class="mg-toolkit-glow mg-toolkit-glow-1" aria-hidden="true"></div>
+        <div class="mg-toolkit-glow mg-toolkit-glow-2" aria-hidden="true"></div>
+
+        <div class="container mg-toolkit-inner">
+          <div class="mg-toolkit-top">
+            <div class="mg-toolkit-label"><span></span> 08 / TOOLKIT</div>
+            <div class="mg-toolkit-note">TOOLS · IDEAS · IMPACT</div>
+          </div>
+
+          <div class="mg-toolkit-stage" id="mgToolkitStage">
+            <div class="mg-toolkit-title">
+              <span>MAKING DIGITAL</span>
+               <strong>FEEL ALIVE.</strong> 
+            </div>
+
+            <div class="mg-toolkit-orbit mg-toolkit-orbit-a"></div>
+            <div class="mg-toolkit-orbit mg-toolkit-orbit-b"></div>
+            <div class="mg-toolkit-orbit mg-toolkit-orbit-c"></div>
+
+            <div class="mg-toolkit-hub" aria-hidden="true">
+              <span>MY TOOLKIT</span>
+            </div>
+
+            <div class="mg-tool-card mg-tool-1" data-depth="1.8"><span class="mg-tool-icon">WP</span><b>WordPress</b></div>
+            <div class="mg-tool-card mg-tool-2" data-depth="2.2"><span class="mg-tool-icon">JS</span><b>JavaScript</b></div>
+            <div class="mg-tool-card mg-tool-3" data-depth="1.5"><span class="mg-tool-icon">HTML</span><b>HTML / CSS</b></div>
+            <div class="mg-tool-card mg-tool-4" data-depth="2"><span class="mg-tool-icon">F</span><b>Figma</b></div>
+            <div class="mg-tool-card mg-tool-5" data-depth="1.7"><span class="mg-tool-icon">M</span><b>Meta Ads</b></div>
+            <div class="mg-tool-card mg-tool-6" data-depth="2.1"><span class="mg-tool-icon">RE</span><b>React</b></div>
+            <div class="mg-tool-card mg-tool-7" data-depth="1.4"><span class="mg-tool-icon">AI</span><b>AI Solutions</b></div>
+            <div class="mg-tool-card mg-tool-8" data-depth="1.9"><span class="mg-tool-icon">G</span><b>Graphic Design</b></div>
+            <div class="mg-tool-card mg-tool-9" data-depth="1.6"><span class="mg-tool-icon">VID</span><b>Video Editing</b></div>
+            <div class="mg-tool-card mg-tool-10" data-depth="2"><span class="mg-tool-icon">G</span><b>Git</b></div>
+            <div class="mg-tool-card mg-tool-11" data-depth="1.5"><span class="mg-tool-icon">SQL</span><b>MySQL</b></div>
+            <div class="mg-tool-card mg-tool-12" data-depth="1.8"><span class="mg-tool-icon">SEO</span><b>Search Growth</b></div>
+            <div class="mg-tool-card mg-tool-13" data-depth="2.2"><span class="mg-tool-icon">ADS</span><b>Google Ads</b></div>
+            <div class="mg-tool-card mg-tool-14" data-depth="1.7"><span class="mg-tool-icon">&lt;/&gt;</span><b>PHP</b></div>
+             <div class="mg-tool-card mg-tool-13" data-depth="2.2"><span class="mg-tool-icon">ADS</span><b>Google Ads</b></div>
+          </div>
+
+          <div class="mg-toolkit-bottom">
+            <span>14 CORE TOOLS</span>
+            <span>MOVE YOUR CURSOR</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="why-me" class="ce-why-section">
+        <div class="container">
+          <div class="section-head reveal">
+            <div>
+              <div class="kicker">09 / Why Work With Me</div>
+              <h2>More than<br>a <span class="gradient">deliverable.</span></h2>
+            </div>
+            <p class="lead">The goal is not simply to make something look good. It is to make the digital experience useful, clear and growth-ready.</p>
+          </div>
+          <div class="ce-why-grid">
+            <div class="ce-why-main reveal">
+              <div class="kicker">MY APPROACH</div>
+              <h3>Strategy + Design + Technology.</h3>
+              <p>I bring web development, digital marketing and creative skills together so you don't have to coordinate every part of a digital project separately.</p><a class="ce-case-link" href="#contact">Let's work together <span>→</span></a>
+            </div>
+            <div class="ce-why-list reveal">
+              <div class="ce-reasons">
+                <div class="ce-reason"><b>01 · Practical</b><small>Solutions are built around the actual business goal, audience and use case.</small></div>
+                <div class="ce-reason"><b>02 · Modern</b><small>Clean layouts, responsive experiences and thoughtful interactions.</small></div>
+                <div class="ce-reason"><b>03 · Growth-minded</b><small>Websites and marketing are planned with visibility and conversion in mind.</small></div>
+                <div class="ce-reason"><b>04 · Collaborative</b><small>Clear communication from discovery through launch and improvement.</small></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="faq" class="ce-faq-section">
+        <div class="container">
+          <div class="section-head reveal">
+            <div>
+              <div class="kicker">10 / FAQ</div>
+              <h2>Questions,<br><span class="gradient">answered.</span></h2>
+            </div>
+            <p class="lead">A few things clients usually want to know before starting a project.</p>
+          </div>
+          <div class="ce-faq-list">
+            <div class="ce-faq reveal"><button type="button"><span>What kind of websites do you build?</span><span>+</span></button>
+              <div class="ce-faq-answer">Business websites, portfolios, education websites, e-commerce stores and custom digital experiences with responsive layouts.</div>
+            </div>
+            <div class="ce-faq reveal"><button type="button"><span>Can you handle design and development together?</span><span>+</span></button>
+              <div class="ce-faq-answer">Yes. The workflow can cover structure, UI direction, development, responsive optimization and launch support.</div>
+            </div>
+            <div class="ce-faq reveal"><button type="button"><span>Do you also provide digital marketing?</span><span>+</span></button>
+              <div class="ce-faq-answer">Yes. Services can include SEO, social media, Google Ads, Meta Ads and growth-focused digital strategy.</div>
+            </div>
+            <div class="ce-faq reveal"><button type="button"><span>Are the pricing packages fixed?</span><span>+</span></button>
+              <div class="ce-faq-answer">No. The packages are starting points. Scope, features and ongoing support can be customized around the project.</div>
+            </div>
+            <div class="ce-faq reveal"><button type="button"><span>How do we start a project?</span><span>+</span></button>
+              <div class="ce-faq-answer">Send the project details through the contact form. We can then discuss the goal, scope, timeline and the most suitable approach.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="ce-cta-section">
+        <div class="container">
+          <div class="ce-cta reveal">
+            <div class="kicker">11 / Let's Build</div>
+            <h2>Your next digital project starts <span class="gradient">here.</span></h2>
+            <p>Have a website, brand, campaign or idea in mind? Let's turn it into something people remember.</p><a class="ce-cta-btn magnetic" href="#contact">Start a Project <span>↗</span></a>
           </div>
         </div>
       </section>
@@ -5148,55 +6743,147 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
     </script>
 
     <script>
-const adsLightbox = document.getElementById('adsLightbox');
-const adsLightboxImage = document.getElementById('adsLightboxImage');
-const adsLightboxClose = document.getElementById('adsLightboxClose');
+      const adsLightbox = document.getElementById('adsLightbox');
+      const adsLightboxImage = document.getElementById('adsLightboxImage');
+      const adsLightboxClose = document.getElementById('adsLightboxClose');
 
-document.querySelectorAll('.ads-shot img').forEach(img => {
+      document.querySelectorAll('.ads-shot img').forEach(img => {
 
-  img.addEventListener('click', function(){
+        img.addEventListener('click', function() {
 
-    adsLightboxImage.src = this.src;
-    adsLightboxImage.alt = this.alt;
+          adsLightboxImage.src = this.src;
+          adsLightboxImage.alt = this.alt;
 
-    adsLightbox.classList.add('active');
+          adsLightbox.classList.add('active');
 
-    document.body.style.overflow = 'hidden';
+          document.body.style.overflow = 'hidden';
 
-  });
+        });
 
-});
+      });
 
-function closeAdsLightbox(){
+      function closeAdsLightbox() {
 
-  adsLightbox.classList.remove('active');
+        adsLightbox.classList.remove('active');
 
-  document.body.style.overflow = '';
+        document.body.style.overflow = '';
 
-  setTimeout(() => {
-    adsLightboxImage.src = '';
-  }, 250);
+        setTimeout(() => {
+          adsLightboxImage.src = '';
+        }, 250);
 
-}
+      }
 
-adsLightboxClose.addEventListener('click', closeAdsLightbox);
+      adsLightboxClose.addEventListener('click', closeAdsLightbox);
 
-adsLightbox.addEventListener('click', function(e){
+      adsLightbox.addEventListener('click', function(e) {
 
-  if(e.target === adsLightbox){
-    closeAdsLightbox();
-  }
+        if (e.target === adsLightbox) {
+          closeAdsLightbox();
+        }
 
-});
+      });
 
-document.addEventListener('keydown', function(e){
+      document.addEventListener('keydown', function(e) {
 
-  if(e.key === 'Escape'){
-    closeAdsLightbox();
-  }
+        if (e.key === 'Escape') {
+          closeAdsLightbox();
+        }
 
-});
-</script>
+      });
+    </script>
+
+
+
+    <script>
+      /* Scoped 3D pricing tilt — uses the same visual language as the portfolio */
+      (function() {
+        const cards = document.querySelectorAll('[data-price-tilt]');
+        if (!cards.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        cards.forEach(card => {
+          let raf = null;
+          const reset = () => {
+            card.style.transform = card.classList.contains('featured') ? 'translateY(-2px) rotateX(0deg) rotateY(0deg)' : 'rotateX(0deg) rotateY(0deg)';
+            card.style.setProperty('--mx', '50%');
+            card.style.setProperty('--my', '50%');
+          };
+          card.addEventListener('pointermove', e => {
+            if (e.pointerType === 'touch') return;
+            const r = card.getBoundingClientRect();
+            const x = e.clientX - r.left;
+            const y = e.clientY - r.top;
+            const rx = ((y / r.height) - .5) * -10;
+            const ry = ((x / r.width) - .5) * 12;
+            card.style.setProperty('--mx', (x / r.width * 100) + '%');
+            card.style.setProperty('--my', (y / r.height * 100) + '%');
+            if (raf) cancelAnimationFrame(raf);
+            raf = requestAnimationFrame(() => {
+              card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg) translateZ(8px)`;
+            });
+          });
+          card.addEventListener('pointerleave', () => {
+            if (raf) cancelAnimationFrame(raf);
+            reset();
+          });
+        });
+      })();
+    </script>
+
+
+    <script>
+      /* FAQ accordion */
+      document.querySelectorAll('.ce-faq button').forEach(btn => btn.addEventListener('click', () => {
+        const item = btn.closest('.ce-faq');
+        document.querySelectorAll('.ce-faq.open').forEach(open => {
+          if (open !== item) open.classList.remove('open')
+        });
+        item.classList.toggle('open');
+      }));
+      /* Pointer-reactive case-study glow */
+      document.querySelectorAll('[data-ce-case]').forEach(card => card.addEventListener('pointermove', e => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--cx', `${e.clientX-r.left}px`);
+        card.style.setProperty('--cy', `${e.clientY-r.top}px`);
+      }));
+    </script>
+
+
+    <script>
+      /* Toolkit cursor/parallax — isolated to #tools */
+      (function() {
+        const stage = document.getElementById('mgToolkitStage');
+        if (!stage) return;
+
+        const cards = stage.querySelectorAll('.mg-tool-card');
+        let targetX = 0,
+          targetY = 0;
+
+        stage.addEventListener('pointermove', function(e) {
+          const r = stage.getBoundingClientRect();
+          targetX = ((e.clientX - r.left) / r.width - .5) * 2;
+          targetY = ((e.clientY - r.top) / r.height - .5) * 2;
+
+          cards.forEach(card => {
+            const depth = parseFloat(card.dataset.depth || 1.5);
+            const tx = targetX * depth * 7;
+            const ty = targetY * depth * 6;
+            card.style.setProperty('--tx', tx.toFixed(1) + 'px');
+            card.style.setProperty('--ty', ty.toFixed(1) + 'px');
+            card.style.setProperty('--hover-x', tx.toFixed(1) + 'px');
+            card.style.setProperty('--hover-y', (ty - 7).toFixed(1) + 'px');
+          });
+        });
+
+        stage.addEventListener('pointerleave', function() {
+          cards.forEach(card => {
+            card.style.setProperty('--tx', '0px');
+            card.style.setProperty('--ty', '0px');
+            card.style.setProperty('--hover-x', '0px');
+            card.style.setProperty('--hover-y', '-7px');
+          });
+        });
+      })();
+    </script>
 
     </body>
 
