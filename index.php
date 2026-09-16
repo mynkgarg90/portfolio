@@ -140,8 +140,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
     * {
       box-sizing: border-box;
       margin: 0;
-      padding: 0;
-      scroll-behavior: smooth
+      padding: 0
     }
 
     body {
@@ -174,7 +173,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
       width: 100%;
       z-index: 1000;
       background: rgba(247, 248, 252, .78);
-      backdrop-filter: blur(18px);
+      backdrop-filter: none;
       border-bottom: 1px solid rgba(232, 235, 242, .8)
     }
 
@@ -239,7 +238,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
       right: -250px;
       top: 70px;
       background: radial-gradient(circle, rgba(99, 91, 255, .18), transparent 68%);
-      filter: blur(10px);
+      filter: none;
       z-index: -1
     }
 
@@ -364,7 +363,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
     .float-card {
       position: absolute;
       background: rgba(255, 255, 255, .86);
-      backdrop-filter: blur(15px);
+      backdrop-filter: none;
       border: 1px solid white;
       box-shadow: var(--shadow);
       border-radius: 18px;
@@ -804,7 +803,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
 
       background: rgba(120, 140, 255, .25);
 
-      filter: blur(50px);
+      filter: none;
 
       z-index: -1;
 
@@ -879,7 +878,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
 
       border: 1px solid rgba(255, 255, 255, .20);
 
-      backdrop-filter: blur(12px);
+      backdrop-filter: none;
 
       font-size: 11px;
       font-weight: 700;
@@ -925,7 +924,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
 
       border: 1px solid rgba(255, 255, 255, .25);
 
-      backdrop-filter: blur(12px);
+      backdrop-filter: none;
 
       transition: .35s ease;
     }
@@ -1445,9 +1444,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
 
     .reveal {
       opacity: 0;
-      transform: translateY(35px);
-      filter: blur(5px);
-      transition: 1s cubic-bezier(.2, .8, .2, 1)
+      transform: translateY(18px);
+      transition: .45s cubic-bezier(.2, .8, .2, 1)
     }
 
     .reveal.show {
@@ -1612,7 +1610,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
       position: absolute;
       inset: 8%;
       background: radial-gradient(circle, rgba(99, 91, 255, .25), transparent 68%);
-      filter: blur(35px);
+      filter: none;
       z-index: -2
     }
 
@@ -1632,7 +1630,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
       inset: -3px;
       border-radius: 34px;
       background: linear-gradient(120deg, rgba(24, 160, 251, .7), transparent 30%, rgba(155, 92, 255, .65), transparent 75%);
-      filter: blur(16px);
+      filter: none;
       opacity: .45;
       z-index: 0
     }
@@ -1679,7 +1677,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
       color: #fff;
       border: 1px solid rgba(114, 199, 255, .35);
       box-shadow: 0 15px 35px rgba(20, 30, 70, .25);
-      backdrop-filter: blur(12px);
+      backdrop-filter: none;
       border-radius: 50px;
       padding: 10px 15px;
       font: 700 10px "Space Grotesk";
@@ -1755,7 +1753,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
       height: 420px;
       border-radius: 50%;
       background: radial-gradient(circle, rgba(24, 160, 251, .18), transparent 68%);
-      filter: blur(20px);
+      filter: none;
       transform: translate3d(calc(var(--px, 0px)*.35), calc(var(--py, 0px)*.35), -120px);
       pointer-events: none;
       transition: transform .25s ease-out
@@ -2077,7 +2075,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
 
       100% {
         transform: scale(1.04) rotate(-3deg);
-        filter: blur(20px) hue-rotate(-12deg)
+        filter: none hue-rotate(-12deg)
       }
     }
 
@@ -2174,7 +2172,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
       height: 300px;
       border-radius: 50%;
       background: radial-gradient(circle, rgba(99, 91, 255, .09), transparent 70%);
-      filter: blur(20px);
+      filter: none;
       pointer-events: none;
       z-index: -1;
       animation: sectionGlow 9s ease-in-out infinite alternate;
@@ -2382,7 +2380,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
         animation: none !important
       }
     }
-  </style>
+  
+    /* PERFORMANCE MODE: keep visuals, remove GPU-heavy continuous effects */
+    .animated-bg, .bg-obstacles, .particles, #particles {
+      animation: none !important;
+    }
+    .skill, .service-card, .process-card, .price, .stat, .project, .mg-tool-card {
+      will-change: auto !important;
+    }
+    .hero-anime-wrap, .hero-anime, .legacy-orb, .float-card, .anime-glow, .hero-orbit {
+      animation-play-state: paused !important;
+    }
+</style>
 
   <style>
     /* ===== IMAGE LIGHTBOX ===== */
@@ -2395,8 +2404,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
       justify-content: center;
       padding: 30px;
       background: rgba(5, 8, 18, .88);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
     }
 
     .ads-lightbox.active {
@@ -2809,7 +2818,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
       border: 1px solid var(--glass-line);
       border-radius: 24px;
       background: var(--glass);
-      backdrop-filter: blur(18px);
+      backdrop-filter: none;
       box-shadow: 0 18px 55px rgba(40, 50, 100, .08);
     }
 
@@ -2909,7 +2918,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
       border: 1px solid var(--glass-line);
       border-radius: 16px;
       background: rgba(255, 255, 255, .82);
-      backdrop-filter: blur(14px);
+      backdrop-filter: none;
       color: var(--ink);
       z-index: 9990;
       cursor: pointer;
@@ -3175,7 +3184,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
     .process-card,
     .price,
     .stat {
-      backdrop-filter: blur(10px)
+      backdrop-filter: none
     }
 
     .skill,
@@ -3398,7 +3407,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
       pointer-events: none;
       z-index: -2;
       background: radial-gradient(circle, rgba(99, 91, 255, .08), transparent 68%);
-      filter: blur(10px);
+      filter: none;
       transition: transform 1.2s cubic-bezier(.2, .8, .2, 1)
     }
 
@@ -4464,8 +4473,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
       border: 1px solid var(--glass-line);
       background: var(--glass);
       box-shadow: 0 16px 40px rgba(40, 50, 100, .09);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
       color: var(--ink);
       border-radius: 14px;
       transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px));
@@ -4911,6 +4920,53 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
     }
   </style>
 
+
+<style id="mobile-responsive-fix">
+@media (max-width: 650px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden;}
+  .container{width:min(92%,1180px);padding-left:0;padding-right:0;}
+  header .nav{height:64px;padding:0 4%;}
+  header .logo{font-size:18px;white-space:nowrap;}
+  .menu{font-size:24px;line-height:1;}
+  .navlinks.open{top:64px;max-height:calc(100vh - 64px);overflow-y:auto;box-sizing:border-box;z-index:9999;}
+  section{padding:58px 0;}
+  .hero{min-height:auto;padding:92px 0 45px;gap:25px;text-align:center;}
+  .hero h1{font-size:clamp(38px,11vw,58px)!important;line-height:.98;letter-spacing:-2px!important;overflow-wrap:anywhere;}
+  .hero p{font-size:15px;line-height:1.7;}
+  .hero .actions{justify-content:center;flex-wrap:wrap;gap:10px;}
+  .hero3d{height:auto;min-height:0;transform:none!important;margin:5px auto 0;width:100%;}
+  .hero-anime-wrap{width:100%;margin:0;transform:none!important;border-radius:22px!important;}
+  .hero-anime{width:100%;border-radius:20px!important;transform:none!important;box-shadow:none!important;}
+  .anime-float{font-size:8px;padding:7px 9px;}
+  .about{gap:30px;}
+  .profile{min-height:0;transform:none;}
+  .profile img{width:100%;height:auto;display:block;}
+  .stats{grid-template-columns:repeat(2,1fr)!important;gap:10px!important;}
+  .stat{padding:14px!important;min-width:0;}
+  .skills{grid-template-columns:1fr!important;gap:14px;}
+  .skill{min-height:0;padding:22px;}
+  .services{grid-template-columns:1fr!important;gap:14px;}
+  .service{grid-template-columns:48px 1fr;padding:22px;gap:14px;}
+  .projects{grid-template-columns:1fr!important;gap:16px;}
+  .projects .project,.projects .project:nth-child(1),.projects .project:nth-child(2){grid-column:auto!important;min-height:330px;}
+  .project{padding:22px;}
+  .pricing{grid-template-columns:1fr!important;gap:14px;}
+  .pricing-3d-section{padding:65px 0 75px;}
+  .pricing-3d-head{display:block;margin-bottom:30px;}
+  .pricing-3d-section::before,.pricing-3d-section::after{display:none;}
+  .contact{grid-template-columns:1fr!important;padding:25px 18px!important;gap:25px;}
+  .row{grid-template-columns:1fr!important;}
+  .section-head h2,.pricing-3d-head h2{font-size:clamp(32px,9vw,48px);line-height:1.05;}
+  .ce-tools{grid-template-columns:repeat(2,1fr)!important;}
+  img{max-width:100%;}
+  [data-tilt],.price,.project,.skill,.service-card{transform:none!important;}
+}
+@media (min-width:651px) and (max-width:900px){
+  .container{width:92%;}
+  .hero,.about,.contact{gap:28px;}
+  .hero h1{font-size:clamp(48px,8vw,70px)!important;}
+}
+</style>
 </head>
 
 <body>
@@ -5959,7 +6015,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
             <!-- PROJECT 01 -->
             <div class="project reveal" data-tilt>
 
-              <img
+              <img loading="lazy" decoding="async"
                 class="project-image"
                 src="smd.png"
                 alt="SMD IIT Website">
@@ -5994,7 +6050,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
             <!-- PROJECT 02 -->
             <div class="project reveal" data-tilt>
 
-              <img
+              <img loading="lazy" decoding="async"
                 class="project-image"
                 src="career.png"
                 alt="Career Evolution">
@@ -6027,7 +6083,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
             <!-- PROJECT 03 -->
             <div class="project reveal" data-tilt>
 
-              <img
+              <img loading="lazy" decoding="async"
                 class="project-image"
                 src="pmi.png"
                 alt="Positive Muslim India">
@@ -6060,7 +6116,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
             <!-- PROJECT 04 -->
             <div class="project reveal" data-tilt>
 
-              <img
+              <img loading="lazy" decoding="async"
                 class="project-image"
                 src="puritz.png"
                 alt="Puritz Chem">
@@ -6092,7 +6148,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
 
             <!-- PROJECT 05 -->
             <a href="?project=google-ads" class="project reveal" data-tilt style="display:block;color:inherit;text-decoration:none;">
-              <img class="project-image" src="google-preview.png" alt="Google Ads Campaign">
+              <img loading="lazy" decoding="async" class="project-image" src="google-preview.png" alt="Google Ads Campaign">
               <div class="big">05</div>
               <div class="project-content">
                 <span class="project-tag">Paid Advertising</span>
@@ -6566,7 +6622,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
         }
 
         /* Card tilt: lighter and only while hovered */
-        if (fine) $$('.skill,.service-card,[data-tilt]').forEach(card => {
+        if (false && fine) $$('.skill,.service-card,[data-tilt]').forEach(card => {
           let r = null;
           card.addEventListener('pointerenter', () => r = card.getBoundingClientRect(), {
             passive: true
@@ -6593,7 +6649,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
         });
 
         /* Magnetic buttons */
-        if (fine) $$('.magnetic').forEach(btn => {
+        if (false && fine) $$('.magnetic').forEach(btn => {
           let r = null;
           btn.addEventListener('pointerenter', () => r = btn.getBoundingClientRect(), {
             passive: true
@@ -6859,6 +6915,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
           targetY = 0;
 
         stage.addEventListener('pointermove', function(e) {
+          if (window.matchMedia('(max-width: 900px), (hover: none)').matches) return;
           const r = stage.getBoundingClientRect();
           targetX = ((e.clientX - r.left) / r.width - .5) * 2;
           targetY = ((e.clientY - r.top) / r.height - .5) * 2;
