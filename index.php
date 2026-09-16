@@ -6140,7 +6140,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
                 <span class="price-plan">Starter</span>
                 <span class="price-badge">For Small Projects</span>
               </div>
-              <div class="price-value"><span class="price-currency">₹</span><span class="price-number">4,999</span><span class="price-plus">+</span></div>
+              <div class="price-value"><span class="price-currency">₹</span><span class="price-number">14,999</span><span class="price-plus">+</span></div>
               <div class="price-period">Starting price · final quote after discussion</div>
               <p class="price-desc">A clean, focused digital setup for individuals and small businesses ready to get online.</p>
               <div class="price-divider"></div>
@@ -6160,7 +6160,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
                 <span class="price-plan">Professional</span>
                 <span class="price-badge">Most Popular</span>
               </div>
-              <div class="price-value"><span class="price-currency">₹</span><span class="price-number">9,999</span><span class="price-plus">+</span></div>
+              <div class="price-value"><span class="price-currency">₹</span><span class="price-number">24,999</span><span class="price-plus">+</span></div>
               <div class="price-period">Starting price · tailored to your project</div>
               <p class="price-desc">The balanced package for brands that need a premium website plus a stronger digital presence.</p>
               <div class="price-divider"></div>
@@ -6181,7 +6181,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
                 <span class="price-plan">Premium</span>
                 <span class="price-badge">Custom</span>
               </div>
-              <div class="price-value"><span class="price-currency">₹</span><span class="price-number">19,999</span><span class="price-plus">+</span></div>
+              <div class="price-value"><span class="price-currency">₹</span><span class="price-number">After Project Discussion</span><span class="price-plus">+</span></div>
               <div class="price-period">Starting price · custom strategy & scope</div>
               <p class="price-desc">A complete digital experience for businesses that want strategy, design, development and growth together.</p>
               <div class="price-divider"></div>
