@@ -6511,8 +6511,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
         <div>© <?php echo date("Y"); ?> Mayank Garg. All rights reserved.</div>
         <div class="social"><a href="https://www.instagram.com/mynk_garg_6?igsi=NTlhdnVodDhmdTcz&utm_source=qr">Instagram</a>
           <a href="https://www.linkedin.com/in/mayank-garg90/">LinkedIn</a>
-          <a href="#">GitHub</a>
-          <a href="#">WhatsApp</a>
+          <a href="https://github.com/mynkgarg90">GitHub</a>
+          <a href="https://wa.me/919012429271?text=Hello%20Mayank%2C%20I%20would%20like%20to%20discuss%20a%20project%20with%20you">WhatsApp</a>
         </div>
       </div>
     </footer>
