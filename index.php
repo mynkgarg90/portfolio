@@ -4214,7 +4214,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
       text-decoration: none;
       color: inherit;
       background: var(--text, #fff);
-      color: var(--bg, #00000);
+      color: #00000;
       font-weight: 800
     }
 
