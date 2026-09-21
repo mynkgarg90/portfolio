@@ -6207,7 +6207,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
                 <li><span class="price-check">✓</span>Contact / enquiry integration</li>
                 <li><span class="price-check">✓</span>Post-launch guidance</li>
               </ul>
-              <a class="price-cta magnetic" href="#contact">Start a Project <span>→</span></a>
+              <a class="price-cta magnetic" href="https://payments.cashfree.com/links?code=wb1tl675ovfg_AAAAAAAVc8E" targer="_blank" rel="noopener noreferrer"> Start a Project <span>→</span></a>
             </article>
 
             <article class="price-card-3d featured reveal" data-price-tilt>
@@ -6228,7 +6228,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
                 <li><span class="price-check">✓</span>Performance & conversion optimization</li>
                 <li><span class="price-check">✓</span>Priority support & revisions</li>
               </ul>
-              <a class="price-cta magnetic" href="#contact">Let's Build It <span>→</span></a>
+              <a class="price-cta magnetic" href="https://payments.cashfree.com/links?code=xb1tnjueuvfg_AAAAAAAVc8E" targer="_blank" rel="noopener noreferrer">Let's Build It <span>→</span></a>
             </article>
 
             <article class="price-card-3d reveal" data-price-tilt>
