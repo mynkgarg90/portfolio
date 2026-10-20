@@ -6160,7 +6160,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
 
             <!-- PROJECT 06 -->
             <a href="?project=meta-ads" class="project reveal" data-tilt style="display:block;color:inherit;text-decoration:none;">
-              <img class="project-image" src="ads-meta.jpg" alt="Meta Ads Campaign">
+              <img class="project-image" src="ads-meta.png" alt="Meta Ads Campaign">
               <div class="big">06</div>
               <div class="project-content">
                 <span class="project-tag">Paid Social</span>
