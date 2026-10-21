@@ -95,6 +95,40 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
 
     if ($httpCode >= 200 && $httpCode < 300) {
 
+      // Forward the validated enquiry to n8n (configured in Render environment).
+      // The existing Resend email remains independent: n8n errors won't block the form.
+      $n8nWebhookUrl = getenv('N8N_WEBHOOK_URL');
+
+      if ($n8nWebhookUrl && filter_var($n8nWebhookUrl, FILTER_VALIDATE_URL)) {
+        $n8nPayload = json_encode([
+          'name' => $name,
+          'email' => $email,
+          'subject' => $subject,
+          'message' => $message,
+          'source' => 'portfolio_contact_form',
+          'submitted_at' => gmdate('c')
+        ]);
+
+        $n8nCh = curl_init($n8nWebhookUrl);
+        curl_setopt_array($n8nCh, [
+          CURLOPT_POST => true,
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+          CURLOPT_POSTFIELDS => $n8nPayload,
+          CURLOPT_CONNECTTIMEOUT => 5,
+          CURLOPT_TIMEOUT => 10
+        ]);
+
+        $n8nResponse = curl_exec($n8nCh);
+        $n8nHttpCode = curl_getinfo($n8nCh, CURLINFO_HTTP_CODE);
+        $n8nCurlError = curl_error($n8nCh);
+        curl_close($n8nCh);
+
+        if ($n8nHttpCode < 200 || $n8nHttpCode >= 300) {
+          error_log("n8n Webhook Error: HTTP $n8nHttpCode | CURL: $n8nCurlError | Response: $n8nResponse");
+        }
+      }
+
       $messageStatus =
         "Thanks $name! Your message has been sent successfully.";
     } else {
@@ -2380,18 +2414,34 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
         animation: none !important
       }
     }
-  
+
     /* PERFORMANCE MODE: keep visuals, remove GPU-heavy continuous effects */
-    .animated-bg, .bg-obstacles, .particles, #particles {
+    .animated-bg,
+    .bg-obstacles,
+    .particles,
+    #particles {
       animation: none !important;
     }
-    .skill, .service-card, .process-card, .price, .stat, .project, .mg-tool-card {
+
+    .skill,
+    .service-card,
+    .process-card,
+    .price,
+    .stat,
+    .project,
+    .mg-tool-card {
       will-change: auto !important;
     }
-    .hero-anime-wrap, .hero-anime, .legacy-orb, .float-card, .anime-glow, .hero-orbit {
+
+    .hero-anime-wrap,
+    .hero-anime,
+    .legacy-orb,
+    .float-card,
+    .anime-glow,
+    .hero-orbit {
       animation-play-state: paused !important;
     }
-</style>
+  </style>
 
   <style>
     /* ===== IMAGE LIGHTBOX ===== */
@@ -4354,38 +4404,40 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
     }
 
     /* Reference-inspired central typography, but using portfolio colours */
-    .mg-toolkit-title{
-  position:absolute;
-  z-index:5;
-  left:50%;
-  top:145px;
-  transform:translateX(-50%);
-  width:min(760px,90%);
-  text-align:center;
-  pointer-events:none;
-  text-transform:uppercase;
-  font-family:"Space Grotesk",sans-serif;
-  line-height:.86;
-  letter-spacing:-4px;
-}
-.mg-toolkit-title span{
-  display:block;
-  font-size:clamp(44px,6vw,84px);
-  color:var(--ink);
-  text-shadow:0 0 28px rgba(99,91,255,.10);
-}
-.mg-toolkit-title strong{
-  display:block;
-  margin-top:8px;
-  font-family:Georgia,"Times New Roman",serif;
-  font-style:italic;
-  font-size:clamp(50px,6.7vw,94px);
-  background:linear-gradient(90deg,var(--blue),var(--purple),var(--cyan));
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-  text-shadow:none;
-}
+    .mg-toolkit-title {
+      position: absolute;
+      z-index: 5;
+      left: 50%;
+      top: 145px;
+      transform: translateX(-50%);
+      width: min(760px, 90%);
+      text-align: center;
+      pointer-events: none;
+      text-transform: uppercase;
+      font-family: "Space Grotesk", sans-serif;
+      line-height: .86;
+      letter-spacing: -4px;
+    }
+
+    .mg-toolkit-title span {
+      display: block;
+      font-size: clamp(44px, 6vw, 84px);
+      color: var(--ink);
+      text-shadow: 0 0 28px rgba(99, 91, 255, .10);
+    }
+
+    .mg-toolkit-title strong {
+      display: block;
+      margin-top: 8px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-style: italic;
+      font-size: clamp(50px, 6.7vw, 94px);
+      background: linear-gradient(90deg, var(--blue), var(--purple), var(--cyan));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: none;
+    }
 
     /* Central toolkit hub */
     .mg-toolkit-hub {
@@ -4921,52 +4973,231 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
   </style>
 
 
-<style id="mobile-responsive-fix">
-@media (max-width: 650px){
-  html,body{width:100%;max-width:100%;overflow-x:hidden;}
-  .container{width:min(92%,1180px);padding-left:0;padding-right:0;}
-  header .nav{height:64px;padding:0 4%;}
-  header .logo{font-size:18px;white-space:nowrap;}
-  .menu{font-size:24px;line-height:1;}
-  .navlinks.open{top:64px;max-height:calc(100vh - 64px);overflow-y:auto;box-sizing:border-box;z-index:9999;}
-  section{padding:58px 0;}
-  .hero{min-height:auto;padding:92px 0 45px;gap:25px;text-align:center;}
-  .hero h1{font-size:clamp(38px,11vw,58px)!important;line-height:.98;letter-spacing:-2px!important;overflow-wrap:anywhere;}
-  .hero p{font-size:15px;line-height:1.7;}
-  .hero .actions{justify-content:center;flex-wrap:wrap;gap:10px;}
-  .hero3d{height:auto;min-height:0;transform:none!important;margin:5px auto 0;width:100%;}
-  .hero-anime-wrap{width:100%;margin:0;transform:none!important;border-radius:22px!important;}
-  .hero-anime{width:100%;border-radius:20px!important;transform:none!important;box-shadow:none!important;}
-  .anime-float{font-size:8px;padding:7px 9px;}
-  .about{gap:30px;}
-  .profile{min-height:0;transform:none;}
-  .profile img{width:100%;height:auto;display:block;}
-  .stats{grid-template-columns:repeat(2,1fr)!important;gap:10px!important;}
-  .stat{padding:14px!important;min-width:0;}
-  .skills{grid-template-columns:1fr!important;gap:14px;}
-  .skill{min-height:0;padding:22px;}
-  .services{grid-template-columns:1fr!important;gap:14px;}
-  .service{grid-template-columns:48px 1fr;padding:22px;gap:14px;}
-  .projects{grid-template-columns:1fr!important;gap:16px;}
-  .projects .project,.projects .project:nth-child(1),.projects .project:nth-child(2){grid-column:auto!important;min-height:330px;}
-  .project{padding:22px;}
-  .pricing{grid-template-columns:1fr!important;gap:14px;}
-  .pricing-3d-section{padding:65px 0 75px;}
-  .pricing-3d-head{display:block;margin-bottom:30px;}
-  .pricing-3d-section::before,.pricing-3d-section::after{display:none;}
-  .contact{grid-template-columns:1fr!important;padding:25px 18px!important;gap:25px;}
-  .row{grid-template-columns:1fr!important;}
-  .section-head h2,.pricing-3d-head h2{font-size:clamp(32px,9vw,48px);line-height:1.05;}
-  .ce-tools{grid-template-columns:repeat(2,1fr)!important;}
-  img{max-width:100%;}
-  [data-tilt],.price,.project,.skill,.service-card{transform:none!important;}
-}
-@media (min-width:651px) and (max-width:900px){
-  .container{width:92%;}
-  .hero,.about,.contact{gap:28px;}
-  .hero h1{font-size:clamp(48px,8vw,70px)!important;}
-}
-</style>
+  <style id="mobile-responsive-fix">
+    @media (max-width: 650px) {
+
+      html,
+      body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+
+      .container {
+        width: min(92%, 1180px);
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      header .nav {
+        height: 64px;
+        padding: 0 4%;
+      }
+
+      header .logo {
+        font-size: 18px;
+        white-space: nowrap;
+      }
+
+      .menu {
+        font-size: 24px;
+        line-height: 1;
+      }
+
+      .navlinks.open {
+        top: 64px;
+        max-height: calc(100vh - 64px);
+        overflow-y: auto;
+        box-sizing: border-box;
+        z-index: 9999;
+      }
+
+      section {
+        padding: 58px 0;
+      }
+
+      .hero {
+        min-height: auto;
+        padding: 92px 0 45px;
+        gap: 25px;
+        text-align: center;
+      }
+
+      .hero h1 {
+        font-size: clamp(38px, 11vw, 58px) !important;
+        line-height: .98;
+        letter-spacing: -2px !important;
+        overflow-wrap: anywhere;
+      }
+
+      .hero p {
+        font-size: 15px;
+        line-height: 1.7;
+      }
+
+      .hero .actions {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .hero3d {
+        height: auto;
+        min-height: 0;
+        transform: none !important;
+        margin: 5px auto 0;
+        width: 100%;
+      }
+
+      .hero-anime-wrap {
+        width: 100%;
+        margin: 0;
+        transform: none !important;
+        border-radius: 22px !important;
+      }
+
+      .hero-anime {
+        width: 100%;
+        border-radius: 20px !important;
+        transform: none !important;
+        box-shadow: none !important;
+      }
+
+      .anime-float {
+        font-size: 8px;
+        padding: 7px 9px;
+      }
+
+      .about {
+        gap: 30px;
+      }
+
+      .profile {
+        min-height: 0;
+        transform: none;
+      }
+
+      .profile img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+      }
+
+      .stat {
+        padding: 14px !important;
+        min-width: 0;
+      }
+
+      .skills {
+        grid-template-columns: 1fr !important;
+        gap: 14px;
+      }
+
+      .skill {
+        min-height: 0;
+        padding: 22px;
+      }
+
+      .services {
+        grid-template-columns: 1fr !important;
+        gap: 14px;
+      }
+
+      .service {
+        grid-template-columns: 48px 1fr;
+        padding: 22px;
+        gap: 14px;
+      }
+
+      .projects {
+        grid-template-columns: 1fr !important;
+        gap: 16px;
+      }
+
+      .projects .project,
+      .projects .project:nth-child(1),
+      .projects .project:nth-child(2) {
+        grid-column: auto !important;
+        min-height: 330px;
+      }
+
+      .project {
+        padding: 22px;
+      }
+
+      .pricing {
+        grid-template-columns: 1fr !important;
+        gap: 14px;
+      }
+
+      .pricing-3d-section {
+        padding: 65px 0 75px;
+      }
+
+      .pricing-3d-head {
+        display: block;
+        margin-bottom: 30px;
+      }
+
+      .pricing-3d-section::before,
+      .pricing-3d-section::after {
+        display: none;
+      }
+
+      .contact {
+        grid-template-columns: 1fr !important;
+        padding: 25px 18px !important;
+        gap: 25px;
+      }
+
+      .row {
+        grid-template-columns: 1fr !important;
+      }
+
+      .section-head h2,
+      .pricing-3d-head h2 {
+        font-size: clamp(32px, 9vw, 48px);
+        line-height: 1.05;
+      }
+
+      .ce-tools {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+
+      img {
+        max-width: 100%;
+      }
+
+      [data-tilt],
+      .price,
+      .project,
+      .skill,
+      .service-card {
+        transform: none !important;
+      }
+    }
+
+    @media (min-width:651px) and (max-width:900px) {
+      .container {
+        width: 92%;
+      }
+
+      .hero,
+      .about,
+      .contact {
+        gap: 28px;
+      }
+
+      .hero h1 {
+        font-size: clamp(48px, 8vw, 70px) !important;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -6317,7 +6548,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
           <div class="mg-toolkit-stage" id="mgToolkitStage">
             <div class="mg-toolkit-title">
               <span>MAKING DIGITAL</span>
-               <strong>FEEL ALIVE.</strong> 
+              <strong>FEEL ALIVE.</strong>
             </div>
 
             <div class="mg-toolkit-orbit mg-toolkit-orbit-a"></div>
@@ -6342,7 +6573,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_message"])) {
             <div class="mg-tool-card mg-tool-12" data-depth="1.8"><span class="mg-tool-icon">SEO</span><b>Search Growth</b></div>
             <div class="mg-tool-card mg-tool-13" data-depth="2.2"><span class="mg-tool-icon">ADS</span><b>Google Ads</b></div>
             <div class="mg-tool-card mg-tool-14" data-depth="1.7"><span class="mg-tool-icon">&lt;/&gt;</span><b>PHP</b></div>
-             <div class="mg-tool-card mg-tool-13" data-depth="2.2"><span class="mg-tool-icon">ADS</span><b>Google Ads</b></div>
+            <div class="mg-tool-card mg-tool-13" data-depth="2.2"><span class="mg-tool-icon">ADS</span><b>Google Ads</b></div>
           </div>
 
           <div class="mg-toolkit-bottom">
